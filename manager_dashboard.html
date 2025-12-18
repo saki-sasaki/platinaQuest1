@@ -544,24 +544,35 @@ document.getElementById("f_start_date").value =
     			console.log("POST payload:", payload);
 
 	    		try {
-    	    		const res  = await fetch(API_URL, {
-        				method: "POST",
-        				body: JSON.stringify(payload)   // ★ヘッダは付けない（今まで通り）
-        			});
-        			const json = await res.json();
-        			console.log("POST result:", json);
+					const res = await fetch(API_URL + "?mode=progress_save", {
+						method: "POST",
+						// ★ headers は付けない（CORSプリフライト回避）
+						body: JSON.stringify(payload) // payloadは送ってるデータ
+					});
 
-        			if (json.status === "ok") {
-        				alert("シートに保存しました✨");
-        			} else {
-        				alert("シート保存に失敗しました…コンソール見てみて！");
-        				console.error(json);
-        			}
-    				} catch (err) {
-        				console.error("POST error:", err);
-        				alert("通信エラーで保存できませんでした(´;ω;｀)");
-      				}
-    		});
+					const raw = await res.text();
+					console.log("save raw:", raw);
+
+					let json;
+					try {
+						json = JSON.parse(raw);
+					} catch (e) {
+						alert("APIの返事がJSONじゃないっぽい…（コンソールの save raw 見て！）");
+						return;
+					}
+
+					console.log("save json:", json);
+
+					if (json.status === "ok") {
+						alert("保存できたよ✨");
+					} else {
+						alert("保存に失敗: " + (json.message || "messageなし"));
+					}
+				} catch (err) {
+					console.error("save error:", err);
+					alert("通信エラーで保存できませんでした");
+				}
+			});
 		}
 
 		/* ========= 全キャスト読み込み（?admin=1） ========= */
