@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>プラチナ★クエスト</title>
+	<link rel="stylesheet" href="assets/common.css">
+	<link rel="stylesheet" href="assets/view.css">
+</head>
+
+<body>
+	<div class="app-shell">
+
+		<!-- ヘッダー -->
+		<header class="header-card">
+
+			<!-- 1段目：左＝タイトル＋ピル / 右＝キャスト切替 -->
+			<div class="header-row1">
+				<div class="header-left">
+					<div class="cast-pill">
+						🎀<span id="castName">[なまえ]の進捗状況</span>🎀
+					</div>
+				</div>
+			</div>
+			<!-- 2段目：出勤サマリー（センター） -->
+			<div class="header-row2">
+				<div class="header-row2-main">
+					出勤 <span id="shiftCount">0</span>回目 /
+					あと<span id="shiftLeft">30</span>回
+				</div>
+			</div>
+			<!-- 3段目：スタート＋達成バッジ（センター） -->
+			<div class="header-row3">
+				<span class="header-start">
+					スタート: <span id="startDate">2025-10-01</span>
+				</span>
+				<span class="summary-badge">
+					達成 <span id="completedCount">0</span> / <span id="totalGoals">13</span>
+				</span>
+			</div>
+		</header>
+
+		<!-- メインクエスト -->
+		<section class="section-card">
+			<div class="section-title">
+				<span>🌟 メインクエスト</span>
+				<span class="section-badge">まずここ💎</span>
+			</div>
+
+			<ul class="mission-list">
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">お客さん5人と連絡先交換</div>
+					</div>
+					<div class="heart-row">
+						<div class="heart-icons" id="q-main-contact-heart_icons">🤍🤍🤍🤍🤍</div>
+						<div class="count-text">
+							<span id="q-main-contact-heart_num">0</span>/5
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">お客さん3組呼ぶ（来店につなげる）</div>
+					</div>
+					<div class="heart-row">
+						<div class="heart-icons" id="q-main-call-heart_icons">🤍🤍🤍</div>
+						<div class="count-text">
+							<span id="q-main-call-heart_num">0</span>/3
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">同伴1件達成</div>
+					</div>
+					<span class="status-badge" id="q-main-dinner-status">未</span>
+				</li>
+			</ul>
+		</section>
+
+		<!-- SNS・セルフプロデュース -->
+		<section class="section-card">
+			<div class="section-title">
+				<span>📱 SNS・セルフプロデュース</span>
+				<span class="section-badge">新規集客力⤴️</span>
+			</div>
+
+			<ul class="mission-list">
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">インスタ／X／TikTok開設</div>
+					</div>
+					<span class="status-badge" id="q-sns-open-status">未</span>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">週2以上投稿キープ（毎週がんばってね❤️‍🔥）</div>
+						<div class="mission-note">個人アカウントorお店TikTok・YouTube🕶️📺</div>
+					</div>
+					<div class="heart-row">
+						<div class="heart-icons" id="q-sns-weekpost-heart_icons">🤍🤍🤍🤍</div>
+						<div class="count-text">
+							<span id="q-sns-weekpost-heart_num">0</span>/4
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">出勤日は「今日いるよ🎶」ってストーリー・ポストで出勤アピール（毎日💗）</div>
+					</div>
+					<div class="heart-row">
+						<div class="count-text">
+							<span id="q-sns-daystory-bar_num">0</span>/30 💗
+						</div>
+						<div class="bar-wrap">
+							<div class="bar-fill" id="q-sns-daystory-bar"></div>
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">他のスタッフの投稿を見ていいね・コメントで交流</div>
+					</div>
+					<div class="status-badge" id="q-sns-interact-status">未</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">総フォロワー50人達成（インスタ+X+TikTok合計）</div>
+						<div class="mission-note">🎉50人達成したら報告→店長チェックします☝️🔆</div>
+					</div>
+					<div class="status-badge" id="q-sns-followers-status">未</div>
+				</li>
+			</ul>
+		</section>
+
+		<!-- コミュニケーション力アップ -->
+		<section class="section-card">
+			<div class="section-title">
+				<span>💬 コミュニケーション力アップ</span>
+				<span class="section-badge">リピーターをつくろう🥰</span>
+			</div>
+
+			<ul class="mission-list">
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">初来店のお礼メッセージを送る（送れた人数分💗）</div>
+					</div>
+					<div class="heart-row">
+						<div class="heart-icons" id="q-line-thanks-heart_icons">🤍🤍🤍🤍🤍</div>
+						<div class="count-text">
+							<span id="q-line-thanks-heart_num">0</span>/5
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">お客さんとメッセージ3往復以上ラリーを続ける</div>
+					</div>
+					<div class="status-badge" id="q-line-rally-status">未</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">トークデッキを作る（話題ネタを3つ以上ストック）</div>
+					</div>
+					<div class="status-badge" id="q-talkdeck-status">未</div>
+				</li>
+			</ul>
+		</section>
+
+		<!-- 営業マインド＆フィードバック -->
+		<section class="section-card">
+			<div class="section-title">
+				<span>🪞 営業マインド＆フィードバック</span>
+				<span class="section-badge">ふりかえり</span>
+			</div>
+
+			<ul class="mission-list">
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">よかった点・反省点を毎週メモ（書けた週ごと💗）</div>
+					</div>
+					<div class="heart-row">
+						<div class="heart-icons" id="q-weekly-ref-heart_icons">🤍🤍🤍🤍</div>
+						<div class="count-text">
+							<span id="q-weekly-ref-heart_num">0</span>/4
+						</div>
+					</div>
+				</li>
+
+				<li class="mission-item">
+					<div class="mission-left">
+						<div class="mission-main-text">お客さんのプロフィール帳を作る</div>
+						<div class="mission-note">「どこ住み？」「どのくらい飲みに来れる？」って聞けたらGOD✨</div>
+					</div>
+					<div class="heart-row">
+						<div class="count-text">
+							<span id="q-customer-profile-bar_num">0</span>/10 💗
+						</div>
+						<div class="bar-wrap">
+							<div class="bar-fill" id="q-customer-profile-bar"></div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</section>
+
+		<!-- 2列メニュー（プロフ帳 / 交換日記） -->
+		<div class="menu-grid">
+			<a id="customerBookLink"
+				class="menu-card"
+				style="background:linear-gradient(135deg,#ff8ac5 0%,#ff66aa 100%);box-shadow:0 8px 16px rgba(255,102,170,.3);">
+				<div class="menu-card-icon">🧑🏻‍🚀</div>
+				<div class="menu-card-title">お客さん<br>プロフ帳</div>
+			</a>
+
+			<a id="journalLink"
+				class="menu-card"
+				style="background:linear-gradient(135deg,#66ccff 0%,#3399ff 100%);box-shadow:0 8px 16px rgba(102,204,255,.3);">
+				<div class="menu-card-icon">📓</div>
+				<div class="menu-card-title">店長<br>交換日記</div>
+			</a>
+		</div>
+
+
+	<script>
+		const params = new URLSearchParams(location.search);
+		const cast = params.get('cast') || "";
+		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+
+		if (!cast) {
+				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
+			}
+		
+		// ▼ プロフ帳リンク（お客さんプロフ帳カード）
+		const customerBookLink = document.getElementById("customerBookLink");
+		if (customerBookLink) {
+			if (cast) {
+				// キャスト付きでプロフ帳へ
+				customerBookLink.setAttribute(
+					"href",
+					"customerbook.html?cast=" + encodeURIComponent(cast)
+				);
+			} else {
+				// 念のため、cast がないときは共通ページに飛ばす
+				customerBookLink.setAttribute("href", "customerbook.html");
+			}
+		}
+
+		// ▼ 店長交換日記
+		const journalLink = document.getElementById("journalLink");
+		if (journalLink) {
+			if (cast) {
+				// キャスト付きで交換日記へ
+				journalLink.setAttribute(
+					"href",
+					"journal.html?cast=" + encodeURIComponent(cast)
+				);
+			} else {
+				// 念のため、cast がないときは共通ページに飛ばす
+				journalLink.setAttribute("href", "journal.html");
+			}
+		}
+
+		// 💗ハート
+		function heartProgress(idPrefix, current, max) {
+			const cur = Number(current) || 0;
+
+			let hearts = "";
+			for (let i = 1; i <= max; i++) {
+				hearts += i <= cur ? "💗" : "🤍";
+			}
+
+			const iconsEl = document.getElementById(`${idPrefix}_icons`);
+			const numEl   = document.getElementById(`${idPrefix}_num`);
+
+			if (iconsEl) iconsEl.textContent = hearts;
+			if (numEl)   numEl.textContent   = cur;
+		}
+
+		// 💗ハートバー
+		function heartBar(countId, barId, current, max){
+			const cur = Math.max(0, Number(current) || 0);
+			const m = Math.max(1, Number(max) || 1);
+			const pct = Math.min(cur / m, 1) * 100;
+
+			const numEl = document.getElementById(countId);
+			const barEl = document.getElementById(barId);
+
+			if (numEl) {
+				numEl.textContent = cur;
+			}
+
+			if (barEl){
+				// レイアウト確定後に幅を入れるとアニメも確実に効く
+				requestAnimationFrame(()=>{ barEl.style.width = pct + "%"; });
+			}
+
+			// デバッグ（必要なら見てね）
+			console.log("heartBar", {countId, barId, cur, m, pct, numEl: !!numEl, barEl: !!barEl});
+		}
+
+
+		// 達成/未達成
+		function setStatus(id, done) {
+			const el = document.getElementById(id);
+			if (!el) return;
+
+			// 一旦リセット
+			el.classList.remove("done", "notyet");
+			el.classList.add("status-badge");
+
+			if (done) {
+				el.textContent = "クリア";
+				el.classList.add("done");
+			} else {
+				el.textContent = "未";
+				el.classList.add("notyet");
+			}
+		}
+
+		fetch(`${API_URL}?cast=${encodeURIComponent(cast)}`)
+		.then(r => r.json())
+		.then(json => {
+			console.log("API response:", json);
+
+			// ★ status/data 形式でも、昔の「素のオブジェクト」でも両対応
+			const data = json.data || json;
+			if (!data) {
+				console.warn("データが空だよ cast:", cast);
+				return;
+			}
+
+			// ===== ヘッダー反映 =====
+			const nameToShow = data.displayName || data.name || "[なまえ]";
+			document.getElementById("castName").textContent =
+			nameToShow + "の進捗状況";
+
+			document.getElementById("shiftCount").textContent =
+			data.shiftCount || 0;
+			document.getElementById("shiftLeft").textContent =
+			(data.shiftRemaining != null) ? data.shiftRemaining : 0;
+			document.getElementById("startDate").textContent =
+			data.startDate || data.start_date || "----";
+
+			// ===== 🌟メインクエスト =====
+			heartProgress("q-main-contact-heart", data.mainContact, 5);
+			heartProgress("q-main-call-heart",    data.mainCall,    3);
+			setStatus("q-main-dinner-status", (Number(data.mainDinner) || 0) >= 1);
+
+			// ===== 📱SNS =====
+			setStatus("q-sns-open-status", (Number(data.snsOpen) || 0) >= 1);
+			heartProgress("q-sns-weekpost-heart", data.snsWeekpost, 4);
+			heartBar(
+				"q-sns-daystory-bar_num",
+				"q-sns-daystory-bar",
+				Number(data.snsDaystory) || 0,
+				30
+			);
+			setStatus("q-sns-interact-status",  (Number(data.snsInteract)  || 0) >= 1);
+			setStatus("q-sns-followers-status", (Number(data.snsFollowers) || 0) >= 50);
+
+			// ===== 💬コミュニケーション =====
+			heartProgress("q-line-thanks-heart", data.lineThanks, 5);
+			setStatus("q-line-rally-status", (Number(data.lineRally) || 0) >= 1);
+			setStatus("q-talkdeck-status",   (Number(data.talkdeck)  || 0) >= 1);
+
+			// ===== 🪞営業マインド =====
+			heartProgress("q-weekly-ref-heart", data.weeklyReflection, 4);
+			heartBar(
+				"q-customer-profile-bar_num",
+				"q-customer-profile-bar",
+				Number(data.customerProfile) || 0,
+				10
+			);
+		})
+		.catch(err => console.error("fetch error:", err));
+
+	</script>
+</body>
+</html>

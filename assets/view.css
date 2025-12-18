@@ -1,0 +1,315 @@
+		/* 1段目：左＝タイトル＋ピル / 右＝キャスト切替 */
+		.header-row1 {
+
+			justify-content: space-between;
+			align-items: center;
+			gap: 0.75rem;
+		}
+
+		/* 左側ブロック（ピル） */
+		.header-left {
+			display: flex;
+			flex-direction: column;
+			gap: 0.4rem;
+			min-width: 0;
+			/* これで横方向の中央寄せになる！ */
+			align-items: center;
+			text-align: center; /* テキストも中央 */
+		}
+
+		/* キャスト名ピル */
+		.cast-pill {
+			font-weight:800;
+			font-size:1.1rem;
+			display:flex;
+			justify-content:center;
+			align-items:center;
+			gap:.5rem;
+			flex-wrap:wrap;
+			margin-top: 1rem;
+		}
+
+		. {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			background: #fff;
+			color: var(--pink);
+			font-weight: 800;
+			font-size: 0.9rem;
+			padding: 0.45rem 1.1rem;
+			border-radius: 999px;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+			width: fit-content;
+		}
+
+		/* 2段目：出勤サマリー（センター） */
+		.header-row2 {
+			margin-top: 0.6rem;
+			text-align: center;
+		}
+
+		/* 出勤サマリーロゴ風 */
+		.header-row2-main {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+
+			padding: 0.6rem 1.2rem;
+			border-radius: 999px;
+
+			background: var(--bg);
+			border:2px solid var(--line);
+			font-size: 1.1rem;
+			font-weight: 800;
+			color: #ff4f9d;
+
+			letter-spacing: 0.03em;
+
+			position: relative;
+		}
+
+		/* キラキラ演出（左右） */
+		.header-row2-main::before,
+		.header-row2-main::after {
+			content: "✨";
+			position: absolute;
+			top: -0.3rem;
+			font-size: 0.9rem;
+			opacity: 0.9;
+		}
+
+		.header-row2-main::before {
+			left: -0.6rem;
+		}
+
+		.header-row2-main::after {
+			right: -0.6rem;
+		}
+
+		/* 3段目：スタート＋達成バッジ（センター） */
+		.header-row3 {
+			margin-top: 0.6rem;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.8rem;
+			margin-bottom: 1rem;
+		}
+
+		.header-start {
+			color: #fff;
+			font-weight: 600;
+		}
+
+		/* 達成バッジ */
+		.summary-badge {
+			border-radius: 999px;
+			padding: 0.15rem 0.6rem;
+			font-size: 0.75rem;
+			font-weight: 800;
+			color: var(--bg);
+			display: inline-flex;
+			align-items: center;
+			gap: 0.25rem;
+		}
+		.summary-badge::before {
+			content: "⭐";
+			font-size: 0.85rem;
+		}
+
+		/* スマホで潰れないように少し調整 */
+		@media (max-width: 480px) {
+			.header-row1 {
+				gap: 0.5rem;
+			}
+			.cast-switcher select {
+				width: 4.5rem;
+			}
+		}
+
+		/* =========================================
+			セクション
+		========================================= */
+		/* セクションカード */
+		.section-card {
+			background: #fff;
+			border-radius: var(--radius-lg);
+			border: 2px solid var(--line);
+			box-shadow: 0 6px 12px rgba(255,102,170,0.15);
+			padding: 1rem 1rem .75rem;
+			margin-top: 1rem;
+		}
+
+		.section-title {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: .5rem;
+			font-size: 1rem;
+			font-weight: 700;
+			color: var(--pink);
+			margin-bottom: .5rem;
+		}
+
+		.section-badge {
+			background: var(--yellow);
+			color: var(--choco);
+			border-radius: var(--radius-md);
+			font-size: .7rem;
+			font-weight: 700;
+			padding: .15rem .4rem;
+			line-height: 1.2;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+		}
+
+		/* ミッションリスト */
+		.mission-list {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.mission-item {
+			background: #fff;
+			border: 2px solid var(--line);
+			border-radius: var(--radius-md);
+			padding: .6rem .75rem;
+			margin-bottom: .5rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			line-height: 1.4;
+			position: relative;
+		}
+
+		.mission-left {
+			display: flex;
+			flex-direction: column;
+			max-width: calc(100% - 70px);
+		}
+
+		.mission-main-text {
+			font-size: .9rem;
+			font-weight: 600;
+			color: var(--choco);
+			word-break: break-word;
+		}
+
+		.mission-note {
+			font-size: .7rem;
+			font-weight: 500;
+			color: #aa7799;
+			margin-top: .25rem;
+		}
+
+		/* ステータスバッジ */
+		.status-badge {
+			min-width: 60px;
+			font-size: .7rem;
+			font-weight: 700;
+			line-height: 1.2;
+			text-align: center;
+			border-radius: var(--radius-md);
+			border: 2px solid var(--pink);
+			padding: .4rem .5rem;
+			box-shadow: 0 4px 8px rgba(0,0,0,.15);
+			background: #fff;
+			color: var(--pink);
+		}
+
+		.status-badge.done {
+			background: var(--pink);
+			border-color: var(--pink);
+			color: #fff;
+		}
+
+		.status-badge.done::after {
+			content: " ";
+		}
+
+		/* ハート進捗バー */
+		.heart-row {
+			font-size: .8rem;
+			font-weight: 700;
+			color: var(--choco);
+			line-height: 1.4;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: .5rem;
+			margin-top: .4rem;
+		}
+
+		.heart-icons {
+			font-size: .9rem;
+			letter-spacing: .1rem;
+			min-width: 4.5rem;
+			font-weight: 700;
+		}
+
+		.count-text {
+			font-size: .7rem;
+			font-weight: 600;
+			color: #aa7799;
+		}
+
+		.bar-wrap {
+			background: #fff;
+			border-radius: var(--radius-md);
+			border: 2px solid var(--line);
+			box-shadow: 0 4px 8px rgba(255,102,170,0.12);
+			width: 100%;
+			max-width: 260px;
+			height: 10px;
+			overflow: hidden;
+		}
+
+		.bar-fill {
+			background: var(--blue);
+			height: 100%;
+			width: 0%;
+			transition: width .3s;
+		}
+
+		/* =========================================
+			3列レイアウト
+		========================================= */
+		.menu-grid {
+			margin-top:2rem;
+			display:grid;
+			grid-template-columns:1fr 1fr;
+			gap:1.2rem;
+			font-family:'Rounded Mplus 1c','Yu Gothic','Hiragino Sans',sans-serif;
+			text-align:center;
+		}
+
+		.menu-card {
+			display:flex;
+			flex-direction:column;
+			align-items:center;
+			justify-content:center;
+			border-radius:20px;
+			color:#fff;
+			text-decoration:none;
+			padding:2.5rem .5rem;
+			transition:.25s ease;
+		}
+
+		.menu-card:active {
+			filter:brightness(.9);
+		}
+
+		.menu-card-icon {
+			font-size:2.5rem;
+			line-height:1;
+		}
+
+		.menu-card-title {
+			font-weight:800;
+			font-size:1.1rem;
+			letter-spacing:1px;
+			margin-top:.4rem;
+			line-height:1.3;
+		}

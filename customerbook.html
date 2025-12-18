@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>お客さんプロフィール帳</title>
+	<link rel="stylesheet" href="assets/common.css">
+	<link rel="stylesheet" href="assets/customerbook.css">
+</head>
+
+<body>
+	<div class="app-shell">
+
+		<!-- ヘッダー -->
+		<div class="header-card">
+			<div class="header-title">お客さんプロフィール帳</div>
+			<div class="cast-pill">
+				<div class="cast-pill-inner">
+					<span id="castName">[なまえ]のページ</span>💟
+				</div>
+			</div>
+		</div>
+
+		<!-- ▼ カレンダー：全員分の来店ログざっくり -->
+		<div class="calendar-card">
+			<div class="calendar-header">
+				<button class="cal-nav" id="calPrevBtn">◀</button>
+				<div class="calendar-title" id="calTitle">2025年1月</div>
+				<button class="cal-nav" id="calNextBtn">▶</button>
+			</div>
+			<div class="calendar-grid" id="calendarGrid">
+				<!-- JSで曜日＆マスを生成 -->
+			</div>
+			<div id="visitDetailBox"></div>
+		</div>
+
+
+		<!-- 一覧カード -->
+		<div class="list-card">
+			<div class="list-headline">
+				<!-- タイトル＋人数バッジ -->
+				<div class="list-title-group">
+					<div class="list-title">📒 お客さんリスト</div>
+					<div class="list-count" id="customerCount">全0人</div>
+				</div>
+				<div class="list-actions">
+					<button class="add-btn" id="addCustomerBtn">NEW＋</button>
+					<button class="log-btn" id="logTodayBtn">今日の来店ログ</button>
+				</div>
+
+				<!-- 並び順＋検索＋追加ボタン（なめらか箱） -->
+				<div class="list-tools">
+					<!-- 並び替え -->
+					<div class="list-sort">
+						<select id="sortMode">
+							<option value="rank">推されランク順</option>
+							<option value="last">最終来店が新しい順</option>
+							<option value="name">名前順</option>
+						</select>
+					</div>
+
+					<!-- 検索ボックス -->
+					<div class="list-search">
+						<input
+							id="searchKeyword"
+							type="text"
+							placeholder="名前・メモで検索"
+						/>
+						<button id="searchBtn" type="button">検索</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="cust-list" id="customerList">
+				<!-- JSでリスト表示 -->
+			</div>
+		</div>
+
+		<!-- 編集フォーム -->
+		<div class="edit-card">
+			<div class="edit-title-row">
+				<div>📝 プロフィール編集</div>
+				<div class="edit-hint" id="editHint">
+					新規追加モード
+				</div>
+			</div>
+
+			<!-- A. 基本 / 関係性 -->
+			<div class="field-block">
+				<label>名前（呼び名）</label>
+				<input type="text" id="f_display_name" placeholder="公認あだ名と非公認あだ名気を付けてね！" />
+			</div>
+
+			<div class="field-block">
+				<label>推されランク 💖（0〜5）</label>
+				<div class="osare-select-row">
+					<div class="osare-hearts-picker" id="osarePicker">
+						<div class="osare-heart-btn" data-level="0">🤍</div>
+						<div class="osare-heart-btn" data-level="1">💙</div>
+						<div class="osare-heart-btn" data-level="2">💚</div>
+						<div class="osare-heart-btn" data-level="3">💛</div>
+						<div class="osare-heart-btn" data-level="4">🧡</div>
+						<div class="osare-heart-btn" data-level="5">💗</div>
+					</div>
+					<div style="font-size:.8rem;font-weight:600;">
+						<span id="osareLevelText">0</span> /5
+					</div>
+				</div>
+			</div>
+
+			<div class="field-block">
+				<label>連絡先交換済み？</label>
+				<div class="contact-row">
+					<input type="checkbox" id="f_has_contact" class="contact-toggle" />
+					<div>交換済💬</div>
+				</div>
+			</div>
+
+			<div class="field-block">
+				<label>最終来店日</label>
+				<input type="date" id="f_last_visit" />
+			</div>
+
+			<hr style="border:0;border-top:2px dashed var(--line);margin:1rem 0;">
+
+			<!-- B. スタイル / 好み -->
+			<div class="field-block">
+				<label>誕生日</label>
+				<input type="text" id="f_birthday" placeholder="10/12 とかでOK" />
+				</div>
+
+				<div class="field-block">
+					<label>血液型</label>
+					<select id="f_blood">
+						<option value="">不明</option>
+						<option value="A">A</option>
+						<option value="B">B</option>
+						<option value="O">O</option>
+						<option value="AB">AB</option>
+					</select>
+				</div>
+
+				<div class="field-block">
+					<label>年齢</label>
+					<input type="text" id="f_age" placeholder="30代 / 20代後半 とかざっくりでもOK" />
+				</div>
+
+				<div class="field-block">
+					<label>よく飲むお酒</label>
+					<input type="text" id="f_drink" placeholder="ハイボール / 甘い系 / シャンパン / ノンアル etc" />
+				</div>
+
+				<div class="field-block">
+					<label>タバコ</label>
+					<input type="text" id="f_smoke" placeholder="吸う / 吸わない / 銘柄 etc" />
+				</div>
+
+				<hr style="border:0;border-top:2px dashed var(--line);margin:1rem 0;">
+
+				<!-- C. 来店情報 -->
+				<div class="field-block">
+					<label>初来店日</label>
+					<input type="date" id="f_first_visit" />
+				</div>
+
+				<div class="field-block">
+					<label>来店のきっかけ（経緯）</label>
+					<input type="text" id="f_how_found" placeholder="紹介 / SNSで見た / フリーで入店 など" />
+				</div>
+
+				<div class="field-block">
+					<label>来店回数</label>
+					<input type="number" id="f_visit_count" min="0" value="0" />
+				</div>
+
+				<div class="field-block">
+					<label>来店ペース・曜日/時間帯</label>
+					<input type="text" id="f_visit_pattern" placeholder="金曜の終電前 / 給料日後の土曜 など" />
+				</div>
+
+				<div class="field-block">
+					<label>住んでるエリア</label>
+					<input type="text" id="f_area" placeholder="北仙台 / 東京 / 県外 など" />
+				</div>
+
+				<div class="field-block">
+					<label>職業</label>
+					<input type="text" id="f_job" placeholder="IT / 自営業 / 会社員 など" />
+				</div>
+
+				<div class="field-block">
+					<label>彼女・嫁いる？</label>
+					<select id="f_has_partner">
+						<option value="">不明</option>
+						<option value="あり">あり</option>
+						<option value="なし">なし</option>
+					</select>
+				</div>
+
+				<hr style="border:0;border-top:2px dashed var(--line);margin:1rem 0;">
+
+				<!-- D. 会話キー -->
+				<div class="field-block">
+					<label>好きなもの（盛り上がる話題）</label>
+					<textarea id="f_likes" placeholder="アニメ/車/釣り/アイドル/スノボ/仕事褒められるの好き など"></textarea>
+				</div>
+
+				<div class="field-block">
+					<label>NG話題（地雷‼）</label>
+					<textarea id="f_ng_topics" placeholder="年齢イジりNG / 家庭の話ふれないで、など"></textarea>
+				</div>
+
+				<!-- E. メモ -->
+				<div class="field-block">
+					<label>メモ📝</label>
+					<textarea id="f_memo" placeholder=""></textarea>
+				</div>
+
+				<button class="save-btn" id="saveCustomerBtn">💗 この内容で保存する</button>
+				<button class="delete-btn" id="deleteCustomerBtn">🗑 このお客さんを削除する</button>
+			</div>
+		</div>
+
+			<!-- フッター -->
+			<div class="footer-nav">
+				<a class="back-link" id="backLink" href="#">← 進捗ページにもどる</a>
+			</div>
+	</div>
+
+	<script>
+		// ★デプロイした Web アプリの URL に変えてね
+		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+
+		// URLの ?cast=saki みたいなのを読み取る
+		const params = new URLSearchParams(window.location.search);
+		const cast = params.get("cast"); // 例: "saki", "maru", "kaede"...
+
+		// cast を表示用の名前（ひらがな＋ちゃん）に変換
+		function castDisplayName(id){
+			if (id === "saki")  return "さきちゃん";
+			if (id === "kaede") return "かえでちゃん";
+			if (id === "mea")   return "めあちゃん";
+			if (id === "oto")   return "おとちゃん";
+			if (id === "maru")  return "まるちゃん";
+			return id || "なまえ未設定";
+		}
+
+		// ヘッダーの「●●ちゃんのページ💟（店長は見れないよ）」 ※文言は好みで変えてOK
+			document.getElementById("castName").textContent =
+  castDisplayName(cast) + " のページ";
+
+		// 現在の編集対象 index。-1なら新規
+		let editingIndex = -1;
+
+		// 全お客さんデータ（customerAPI.gs のオブジェクトそのまま）
+		let customers = [];
+
+		// ★検索キーワード（空なら全件表示）
+		let searchKeyword = "";
+
+		// id → customers配列の index を引けるようにするマップ
+		let customerIndexMap = {};
+
+		// 推され度(0-5)
+		let tempOsareLevel = 0;
+
+		// カレンダー用：いま表示している年月
+		var currentCalYear;
+		var currentCalMonth;
+
+		let selectedDate = "";
+		let currentSelectedCell = null; // ★追加（今選択中のマス）
+
+		let allCustomers = [];      // API から全部入れるところ
+		let filteredCustomers = []; // 検索や絞り込み後（なければ allCustomers と同じ）
+
+		// ========= UI初期化 =========
+		function initStaticUI(){
+
+			// 戻るボタンのリンク（自分の進捗ページに戻る）
+			const back = document.getElementById("backLink");
+			if (cast) {
+				back.setAttribute("href", "view.html?cast=" + encodeURIComponent(cast));
+			} else {
+				back.setAttribute("href", "view.html");
+			}
+		}
+
+		// ========= 推されランクUI =========
+		function renderOsarePicker(){
+			const hearts = document.querySelectorAll(".osare-heart-btn");
+			hearts.forEach(btn=>{
+				const level = Number(btn.dataset.level);
+				if(level <= tempOsareLevel){
+					btn.classList.add("active");
+				} else {
+					btn.classList.remove("active");
+				}
+			});
+			document.getElementById("osareLevelText").textContent = tempOsareLevel;
+		}
+
+		function setupOsarePicker(){
+			const picker = document.getElementById("osarePicker");
+			picker.addEventListener("click",(e)=>{
+				const t = e.target.closest(".osare-heart-btn");
+				if(!t) return;
+				tempOsareLevel = Number(t.dataset.level);
+				renderOsarePicker();
+			});
+		}
+
+		// ========= 今日の来店ログ =========
+		async function logTodayVisit() {
+			if (!cast) {
+				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
+				return;
+			}
+			if (editingIndex === -1) {
+				alert("まず一覧から今日来店したお客さんをタップして選んでね！");
+				return;
+			}
+
+			var c = customers[editingIndex];
+			if (!c.id) {
+				alert("まだシートに保存されていないお客さんです。\n先に「保存する」を押してからログをつけてね！");
+				return;
+			}
+
+			var today = new Date();
+			var y = today.getFullYear();
+			var m = today.getMonth() + 1;
+			var d = today.getDate();
+			var dateStr =
+				y + "-" +
+				("0" + m).slice(-2) + "-" +
+				("0" + d).slice(-2);
+
+			try {
+				var res = await fetch(API_URL + "?mode=visitlog", {
+					method: "POST",
+					body: JSON.stringify({
+						cast: cast,
+						customerId: c.id,
+						visitDate: dateStr
+					})
+				});
+				var json = await res.json();
+				if (json.status === "ok") {
+					alert("今日の来店ログを追加しました✨");
+    				// カレンダーが今月を表示中なら再読み込み
+					loadCalendar(currentCalYear, currentCalMonth);
+				} else {
+					console.error("visitlog error:", json);
+					alert("来店ログの保存に失敗しました…");
+				}
+			} catch (err) {
+				console.error("visitlog fetch error:", err);
+				alert("通信エラーで来店ログを保存できませんでした…");
+			}
+		}
+
+		// ========= API 呼び出し =========
+
+		// ★今の「検索キーワード」と「並び順」で並べた結果を index の配列で返す
+function buildViewIndices() {
+  const kw = (searchKeyword || "").trim().toLowerCase();
+
+  const sortSelect = document.getElementById("sortMode");
+  const mode = sortSelect ? sortSelect.value : "rank";
+
+  // [0,1,2,...] みたいな元配列の index のリスト
+  const indices = customers.map((_, idx) => idx);
+
+  // 検索フィルタ
+  const filtered = indices.filter(i => {
+    if (!kw) return true;
+    const c = customers[i];
+    const text =
+      ((c.customerName || "") + " " + (c.memo || "")).toLowerCase();
+    return text.includes(kw);
+  });
+
+  // 日付を安全に Date にするヘルパー
+  function toDateSafe(v) {
+    if (!v) return new Date("1970-01-01");
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? new Date("1970-01-01") : d;
+  }
+
+  // 並び替え
+  if (mode === "rank") {
+    // 推されランク → 最終来店
+    filtered.sort((ia, ib) => {
+      const a = customers[ia];
+      const b = customers[ib];
+      const ra = Number(a.heartRank || 0);
+      const rb = Number(b.heartRank || 0);
+      if (ra !== rb) return rb - ra;
+
+      const da = toDateSafe(a.lastVisit);
+      const db = toDateSafe(b.lastVisit);
+      return db - da;
+    });
+  } else if (mode === "last") {
+    // 最終来店が新しい順
+    filtered.sort((ia, ib) => {
+      const da = toDateSafe(customers[ia].lastVisit);
+      const db = toDateSafe(customers[ib].lastVisit);
+      return db - da;
+    });
+  } else if (mode === "name") {
+    // 名前順
+    filtered.sort((ia, ib) => {
+      const na = (customers[ia].customerName || "").toString();
+      const nb = (customers[ib].customerName || "").toString();
+      return na.localeCompare(nb, "ja");
+    });
+  }
+
+  return filtered;
+}
+
+		// 一覧取得（castごと）
+		async function fetchCustomerList() {
+			if (!cast) return;
+
+			try {
+				const url = `${API_URL}?mode=list&cast=${encodeURIComponent(cast)}`;
+				const res = await fetch(url);
+				const json = await res.json();
+				if (json.status === "ok") {
+					customers = json.data || [];
+				} else {
+					console.error("list error:", json);
+					customers = [];
+				}
+			} catch (err) {
+				console.error("fetch list error:", err);
+				customers = [];
+			}
+		}
+
+		// 保存（新規・更新両方）
+		async function saveCustomerToServer(obj) {
+			const res = await fetch(`${API_URL}?mode=save`, {
+				method: "POST",
+				body: JSON.stringify(obj)
+			});
+			const json = await res.json();
+			return json;
+		}
+
+		// 削除
+		async function deleteCustomerOnServer(id) {
+			const res = await fetch(`${API_URL}?mode=delete`, {
+				method: "POST",
+				body: JSON.stringify({ id })
+			});
+			const json = await res.json();
+			return json;
+		}
+
+		// 月別の来店数（全員分）を取ってくる
+		async function fetchVisitStats(year, month) {
+			try {
+				var url = API_URL + "?mode=visitstats"
+					+ "&year=" + encodeURIComponent(year)
+					+ "&month=" + encodeURIComponent(month);
+				var res = await fetch(url);
+				var json = await res.json();
+				if (json.status === "ok") {
+    				// 期待フォーマット: [{date:"2025-01-03", count:2}, ...]
+					return json.data || [];
+				} else {
+					console.error("visitstats error:", json);
+					return [];
+				}
+			} catch (err) {
+				console.error("visitstats fetch error:", err);
+				return [];
+			}
+		}
+
+		// ========= カレンダー =========
+		function buildCalendarGrid(year, month, stats) {
+			var grid = document.getElementById("calendarGrid");
+			if (!grid) return;
+
+			// stats をマップ化: { "yyyy-MM-dd": count }
+			var map = {};
+			for (var i = 0; i < stats.length; i++) {
+				var s = stats[i];
+				if (s.date) {
+					map[s.date] = Number(s.count || 0);
+				}
+			}
+
+			grid.innerHTML = "";
+
+			var weekdays = ["日","月","火","水","木","金","土"];
+			for (var w = 0; w < 7; w++) {
+				var wd = document.createElement("div");
+					wd.className = "cal-weekday";
+					wd.textContent = weekdays[w];
+					grid.appendChild(wd);
+			}
+
+			// 当月の情報
+			var first = new Date(year, month - 1, 1);
+			var firstWeekday = first.getDay(); // 0(日)〜6(土)
+			var daysInMonth = new Date(year, month, 0).getDate();
+
+			// 前の空白マス
+			for (var e = 0; e < firstWeekday; e++) {
+				var emptyCell = document.createElement("div");
+					emptyCell.className = "calendar-day empty";
+					grid.appendChild(emptyCell);
+			}
+
+			var today = new Date();
+			var todayStr =
+				today.getFullYear() + "-" +
+				("0" + (today.getMonth() + 1)).slice(-2) + "-" +
+				("0" + today.getDate()).slice(-2);
+
+			// 日付マス
+			for (var day = 1; day <= daysInMonth; day++) {
+				var cell = document.createElement("div");
+					cell.className = "calendar-day";
+
+				var dateStr =
+					year + "-" +
+					("0" + month).slice(-2) + "-" +
+					("0" + day).slice(-2);
+
+				if (dateStr === todayStr) {
+					cell.className += " today";
+				}
+
+				// ★クリックした日付の詳細を表示 ＆ キラッと選択
+				cell.addEventListener("click", (function(d, el) {
+					return function () {
+						// 日付を覚えておく（必要なら使う）
+						selectedDate = d;
+
+						// いままで選択されてたマスのハイライトを外す
+						if (currentSelectedCell) {
+							currentSelectedCell.classList.remove("is-selected");
+						}
+
+						// 今押したマスを選択状態に
+						currentSelectedCell = el;
+						currentSelectedCell.classList.add("is-selected");
+
+						// その日の来店メンバーを表示
+						showVisitDetail(d);
+					};
+				})(dateStr, cell));
+
+				var num = document.createElement("div");
+					num.className = "calendar-day-num";
+					num.textContent = day;
+
+					cell.appendChild(num);
+
+				var count = map[dateStr] || 0;
+				if (count > 0) {
+					var badge = document.createElement("div");
+						badge.className = "calendar-day-badge";
+						badge.textContent = count + "件";
+						cell.appendChild(badge);
+					}
+
+				grid.appendChild(cell);
+			}
+
+			grid.appendChild(cell);
+		}
+
+		// カレンダー読み込み
+		async function loadCalendar(year, month) {
+			currentCalYear = year;
+			currentCalMonth = month;
+
+			var title = document.getElementById("calTitle");
+			if (title) {
+				title.textContent = year + "年" + month + "月";
+			}
+
+			var stats = await fetchVisitStats(year, month);
+			buildCalendarGrid(year, month, stats);
+		}
+
+		// ▼ 指定の日付の来店ログ（誰が来たか）を取得
+		// GAS側: ?mode=visitdetail&cast=xxx&date=yyyy-MM-dd を実装しておく想定
+		async function fetchVisitDetail(dateStr) {
+			if (!cast) return [];
+
+			try {
+				const url =
+					`${API_URL}?mode=visitdetail` +
+					`&cast=${encodeURIComponent(cast)}` +
+					`&date=${encodeURIComponent(dateStr)}`;
+
+				const res = await fetch(url);
+				const json = await res.json();
+				if (json.status === "ok") {
+					// 期待フォーマット: [{ customerName: "たなかさん", ... }, ...]
+					return json.data || [];
+				} else {
+					console.error("visitdetail error:", json);
+					return [];
+				}
+			} catch (err) {
+				console.error("visitdetail fetch error:", err);
+				return [];
+			}
+		}
+
+		// ▼ 下のピンク枠に「この日誰が来たか」を表示
+		function renderVisitDetailBox(dateStr, logs) {
+			const box = document.getElementById("calendarDetail");
+			if (!box) return;
+
+			if (!logs || logs.length === 0) {
+				box.innerHTML = `📅 <strong>${dateStr}</strong> の来店ログはまだありません。`;
+				return;
+			}
+
+			const items = logs
+			.map(l => `<li>${l.customerName || "(名前なし)"}</li>`)
+			.join("");
+
+			box.innerHTML = `
+				📅 <strong>${dateStr}</strong> の来店メンバー<br/>
+				<ul>${items}</ul>
+			`;
+		}
+
+		// visit_log の削除API
+		async function deleteVisitLogOnServer(rowIndex, customerId) {
+			const res = await fetch(API_URL + "?mode=visitlog_delete", {
+				method: "POST",
+				body: JSON.stringify({ rowIndex, customerId })
+			});
+			return await res.json();
+		}
+
+		// visit_log の日付更新API
+		async function updateVisitLogOnServer(rowIndex, customerId, visitDate) {
+			const res = await fetch(API_URL + "?mode=visitlog_update", {
+				method: "POST",
+				body: JSON.stringify({ rowIndex, customerId, visitDate })
+			});
+			return await res.json();
+		}
+
+		// カレンダーの1日をタップしたとき
+		// 日付をタップしたとき：その日の来店メンバーを「ここに出るよ📅」に表示＋プロフ編集ボタン
+		async function onCalendarDayClick(dateStr) {
+			const infoBox = document.getElementById("calendarDayInfo");
+			if (!infoBox) return;
+
+			infoBox.textContent = "読み込み中…";
+
+			try {
+				const url = `${API_URL}?mode=visitdetail`
+					+ `&cast=${encodeURIComponent(cast || "")}`
+					+ `&date=${encodeURIComponent(dateStr)}`;
+
+				const res = await fetch(url);
+				const json = await res.json();
+
+				if (json.status !== "ok") {
+					console.error("visitdetail error:", json);
+					infoBox.textContent = "読み込みに失敗しました…";
+					return;
+				}
+
+				const list = json.data || [];
+
+				if (list.length === 0) {
+					infoBox.textContent = `${dateStr} の来店ログはありません`;
+					return;
+				}
+
+				// 中身を組み立て
+				const wrapper = document.createElement("div");
+				wrapper.style.display = "flex";
+				wrapper.style.flexDirection = "column";
+				wrapper.style.gap = "0.25rem";
+
+				const title = document.createElement("div");
+				title.textContent = `${dateStr} の来店メンバー`;
+				title.style.fontWeight = "700";
+				title.style.marginBottom = "0.25rem";
+				wrapper.appendChild(title);
+
+				list.forEach(v => {
+					const row = document.createElement("div");
+					row.style.display = "flex";
+					row.style.alignItems = "center";
+					row.style.justifyContent = "space-between";
+					row.style.gap = "0.3rem";
+
+					const name = document.createElement("div");
+					name.textContent = v.customerName || "(名前なし)";
+					row.appendChild(name);
+
+					// プロフ編集ボタン
+					const btn = document.createElement("button");
+					btn.textContent = "プロフ編集";
+					btn.style.fontSize = "0.7rem";
+					btn.style.padding = "0.2rem 0.5rem";
+					btn.style.borderRadius = "999px";
+					btn.style.border = "1px solid #ffd4ec";
+					btn.style.background = "#fff";
+					btn.style.color = "#ff66aa";
+					btn.style.cursor = "pointer";
+
+					btn.addEventListener("click", () => {
+						const idx = customerIndexMap[v.customerId];
+						if (idx == null) {
+							alert("このお客さんのプロフィールが一覧に見つかりませんでした…");
+							return;
+						}
+
+						// 右側のプロフフォームに読み込む
+						loadToForm(idx);
+						// フォームが画面外にあったらスクロール
+						const editCard = document.querySelector(".edit-card");
+						if (editCard) {
+							editCard.scrollIntoView({ behavior: "smooth", block: "start" });
+						}
+					});
+
+					row.appendChild(btn);
+					wrapper.appendChild(row);
+				});
+
+				infoBox.innerHTML = "";
+				infoBox.appendChild(wrapper);
+
+			} catch (err) {
+				console.error("visitdetail fetch error:", err);
+				infoBox.textContent = "通信エラーで読み込めませんでした…";
+			}
+		}
+
+
+		// 日付をタップしたとき：その日の来店メンバーを「ここに出るよ📅」に表示
+		async function onCalendarDayClick(dateStr) {
+			const infoBox = document.getElementById("calendarDayInfo");
+			if (!infoBox) return;
+
+			infoBox.textContent = "読み込み中…";
+
+			try {
+				const url = `${API_URL}?mode=visitdetail`
+					+ `&cast=${encodeURIComponent(cast || "")}`
+					+ `&date=${encodeURIComponent(dateStr)}`;
+
+				const res = await fetch(url);
+				const json = await res.json();
+
+				if (json.status !== "ok") {
+					console.error("visitdetail error:", json);
+					infoBox.textContent = "読み込みに失敗しました…";
+					return;
+				}
+
+				const list = json.data || [];
+
+				if (list.length === 0) {
+					infoBox.textContent = `${dateStr} の来店ログはありません`;
+					return;
+				}
+
+				const names = list.map(v => v.customerName || "(名前なし)");
+
+				infoBox.textContent = `${dateStr} の来店メンバー：` + names.join("、");
+
+				// ★もしここで「編集ポップアップ」も開きたいなら、
+				//   ここから自分の openVisitPopup(dateStr, list) みたいな関数を呼べばOK
+				// openVisitPopup(dateStr, list);
+
+			} catch (err) {
+				console.error("visitdetail fetch error:", err);
+				infoBox.textContent = "通信エラーで読み込めませんでした…";
+			}
+		}
+
+		// 名前を安全に表示する用（< > とかをエスケープ）
+		function esc(str) {
+			if (str == null) return "";
+			return String(str)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;");
+		}
+
+		function showVisitDetail(dateStr) {
+			const info = document.getElementById("calendarDayInfo");
+			if (info) info.style.display = "none";
+			const url = `${API_URL}?mode=visitdetail&cast=${encodeURIComponent(cast)}&date=${encodeURIComponent(dateStr)}`;
+
+			fetch(url)
+			.then(r => r.json())
+			.then(res => {
+				if (res.status !== "ok") {
+					console.error("visitdetail error:", res);
+					return;
+				}
+
+				const list = res.data || [];
+				let html = `
+  <div class="visit-detail-card">
+    <div class="visit-detail-header">
+      <div class="visit-detail-title">📅 ${esc(dateStr)} の来店ログ</div>
+      <div class="visit-detail-caption">
+        この日に来てくれたお客さんリストだよ🪄
+      </div>
+    </div>
+`;
+
+if (list.length === 0) {
+  html += `
+    <div class="visit-detail-empty">
+      まだ来店ログがないみたい…🥹<br>
+      「今日の来店ログ」から登録してみてね。
+    </div>
+  `;
+} else {
+  html += `<div class="visit-detail-list">`;
+
+  list.forEach(item => {
+    const name = item.customerName || "(ななしさん)";
+html += `
+  <div class="visit-detail-item">
+    <div class="visit-detail-main">
+      <span class="visit-detail-icon">🍸</span>
+
+      <button class="visit-detail-name-btn"
+  onclick="openCustomerFromVisit('${item.customerId}')">
+  ${esc(name)}
+</button>
+
+    </div>
+
+    <div class="visit-detail-actions">
+      <button class="visit-btn visit-btn-edit"
+        onclick="editVisit('${item.customerId}','${dateStr}')">編集✏️</button>
+      <button class="visit-btn visit-btn-delete"
+        onclick="deleteVisit('${item.customerId}','${dateStr}')">削除🗑</button>
+    </div>
+  </div>
+`;
+
+  });
+
+  html += `</div>`; // visit-detail-list
+}
+
+html += `</div>`; // ★ visit-detail-card を最後に閉じる
+
+
+				const box = document.getElementById("visitDetailBox");
+				if (box) {
+					box.innerHTML = html;
+				}
+			})
+			.catch(err => {
+				console.error("visitdetail fetch error:", err);
+			});
+		}
+
+		// ========= 来店ログ編集・削除 =========
+		function editVisit(customerId, dateStr) {
+			const newDate = prompt("新しい来店日を入力 (YYYY-MM-DD):", dateStr);
+			if (!newDate) return;
+
+			const cast = currentCast;
+
+			const body = {
+				mode: "visitlog_edit",
+    			id: customerId + "_" + dateStr, // visit_log の rowId に合わせるならここ調整
+				customerId: customerId,
+				cast: cast,
+				visitDate: newDate
+			};
+
+			fetch(API_URL, {
+				method: "POST",
+				body: JSON.stringify(body)
+			})
+			.then(r => r.json())
+			.then(res => {
+				alert("更新しました！");
+				showVisitDetail(newDate);
+			});
+		}
+
+		function deleteVisit(customerId, dateStr) {
+			if (!confirm("削除してOK？")) return;
+
+			const body = {
+				mode: "visitlog_delete",
+				id: customerId + "_" + dateStr
+			};
+
+			fetch(API_URL, {
+				method: "POST",
+				body: JSON.stringify(body)
+			})
+			.then(r => r.json())
+			.then(res => {
+				alert("削除しました！");
+				showVisitDetail(dateStr);
+			});
+		}
+
+		// ========= リスト描画 =========
+		function makeHeartString(level) {
+			const icons = ["🤍", "💙", "💚", "💛", "🧡", "💗"];
+			level = Number(level) || 0;
+
+			// 範囲外レベルを防ぐ
+			if (level < 0) level = 0;
+			if (level > 5) level = 5;
+
+			return icons[level];
+		}
+
+		function applySortAndRender() {
+			const select = document.getElementById("sortMode");
+			const mode = select ? select.value : "rank";
+
+			// 今持ってる customers をコピーしてソート
+			const list = [...customers];
+
+			// 日付を安全に Date に変換するヘルパー
+			function toDateSafe(v) {
+				if (!v) return new Date("1970-01-01");
+				const d = new Date(v);
+				return isNaN(d.getTime()) ? new Date("1970-01-01") : d;
+			}
+
+			if (mode === "rank") {
+				// 推されランク順（heartRank 降順 → 最終来店が新しい順）
+				list.sort((a, b) => {
+					const ra = Number(a.heartRank || 0);
+					const rb = Number(b.heartRank || 0);
+					if (ra !== rb) return rb - ra;   // ランク高い順
+
+					const da = toDateSafe(a.lastVisit);
+					const db = toDateSafe(b.lastVisit);
+					return db - da;                  // 新しい日付が先
+				});
+			} else if (mode === "last") {
+				// 最終来店が新しい順
+				list.sort((a, b) => {
+					const da = toDateSafe(a.lastVisit);
+					const db = toDateSafe(b.lastVisit);
+					return db - da;
+				});
+			} else if (mode === "name") {
+				// 名前順（customerName の五十音順）
+				list.sort((a, b) => {
+					const na = (a.customerName || "").toString();
+					const nb = (b.customerName || "").toString();
+					return na.localeCompare(nb, "ja");
+				});
+			}
+
+			// ソート結果を公式 customers に反映してから描画
+			customers = list;
+			renderCustomerList();
+		}
+
+		function renderCustomerList() {
+			const listEl  = document.getElementById("customerList");
+			const countEl = document.getElementById("customerCount");
+
+			listEl.innerHTML = "";
+
+			if (countEl) {
+				countEl.textContent = `全${customers.length}人`;
+			}
+
+			customerIndexMap = {};
+
+			// ★ここで「検索＋ソート後の並び」を決める
+			const indices = buildViewIndices();
+
+			if (indices.length === 0) {
+				const emptyMsg = document.createElement("div");
+				emptyMsg.style.fontSize   = ".75rem";
+				emptyMsg.style.color      = "#a07799";
+				emptyMsg.style.textAlign  = "center";
+				emptyMsg.style.padding    = ".75rem 0";
+				emptyMsg.textContent      =
+					"条件に当てはまるお客さんがいません…🔍\nキーワードや並び順を変えてみてね。";
+				listEl.appendChild(emptyMsg);
+				return;
+			}
+
+			// 並び順に沿ってカード生成
+			indices.forEach(idx => {
+				const c = customers[idx];
+
+				// id → index マップ（カレンダー側からも使える）
+				if (c.id) {
+					customerIndexMap[c.id] = idx;
+				}
+
+				const item = document.createElement("div");
+				item.className = "cust-item";
+				item.dataset.index = idx;
+
+				item.addEventListener("click", () => {
+					loadToForm(idx);
+				});
+
+				// 上段
+				const topRow = document.createElement("div");
+				topRow.className = "cust-toprow";
+
+				const leftWrap = document.createElement("div");
+				leftWrap.className = "cust-leftname";
+
+				const nm = document.createElement("div");
+				nm.textContent = c.customerName || "(名前なし)";
+
+				const hearts = document.createElement("div");
+				hearts.className = "osare-hearts";
+				hearts.textContent = makeHeartString(c.heartRank || 0);
+
+				leftWrap.appendChild(nm);
+				leftWrap.appendChild(hearts);
+				topRow.appendChild(leftWrap);
+
+				const contact = document.createElement("div");
+				contact.className =
+					"cust-contact-flag " + (c.exchangeContact ? "" : "no");
+				contact.textContent = c.exchangeContact ? "連絡先あり" : "まだ";
+				topRow.appendChild(contact);
+
+				// 下段
+				const bottomRow = document.createElement("div");
+				bottomRow.className = "cust-bottomrow";
+
+				const visitP = document.createElement("div");
+				visitP.textContent =
+					(c.visitFrequency || "") || "来やすい時間まだ不明";
+
+				const lastV = document.createElement("div");
+				lastV.textContent =
+					c.lastVisit ? ("最終: " + c.lastVisit) : "最終来店: ？";
+
+				bottomRow.appendChild(visitP);
+				bottomRow.appendChild(lastV);
+
+				item.appendChild(topRow);
+				item.appendChild(bottomRow);
+				listEl.appendChild(item);
+			});
+		}
+
+		// ========= フォーム操作 =========
+		function clearForm(){
+			editingIndex = -1;
+			document.getElementById("editHint").textContent = "新規追加モード";
+
+			document.getElementById("f_display_name").value = "";
+			tempOsareLevel = 0;
+			renderOsarePicker();
+
+			document.getElementById("f_has_contact").checked = false;
+			document.getElementById("f_last_visit").value = "";
+
+			document.getElementById("f_birthday").value = "";
+			document.getElementById("f_blood").value = "";
+			document.getElementById("f_age").value = "";
+			document.getElementById("f_drink").value = "";
+			document.getElementById("f_smoke").value = "";
+
+			document.getElementById("f_first_visit").value = "";
+			document.getElementById("f_how_found").value = "";
+			document.getElementById("f_visit_count").value = "0";
+			document.getElementById("f_visit_pattern").value = "";
+			document.getElementById("f_area").value = "";
+			document.getElementById("f_job").value = "";
+			document.getElementById("f_has_partner").value = "";
+
+			document.getElementById("f_likes").value = "";
+			document.getElementById("f_ng_topics").value = "";
+			document.getElementById("f_memo").value = "";
+
+			// 削除ボタンOFF
+			const delBtn = document.getElementById("deleteCustomerBtn");
+			if (delBtn) {
+				delBtn.disabled = true;
+				delBtn.style.opacity = "0.5";
+			}
+		}
+
+		function loadToForm(idx){
+			editingIndex = idx;
+			const c = customers[idx];
+
+			document.getElementById("editHint").textContent =
+			(c.customerName || "(名前なし)") + " さんを編集";
+
+			document.getElementById("f_display_name").value = c.customerName || "";
+			tempOsareLevel = Number(c.heartRank || 0);
+			renderOsarePicker();
+
+			document.getElementById("f_has_contact").checked = !!c.exchangeContact;
+			document.getElementById("f_last_visit").value = c.lastVisit || "";
+
+			document.getElementById("f_birthday").value = c.birthday || "";
+			document.getElementById("f_blood").value = c.bloodType || "";
+			document.getElementById("f_age").value = c.age || "";
+			document.getElementById("f_drink").value = c.favoriteAlcohol || "";
+			document.getElementById("f_smoke").value = c.smoking || "";
+
+			document.getElementById("f_first_visit").value = c.firstVisit || "";
+			document.getElementById("f_how_found").value = c.entryReason || "";
+			document.getElementById("f_visit_count").value =
+				(c.visitCount != null ? c.visitCount : 0);
+			document.getElementById("f_visit_pattern").value = c.visitFrequency || "";
+			document.getElementById("f_area").value = c.area || "";
+			document.getElementById("f_job").value = c.job || "";
+			document.getElementById("f_has_partner").value = c.hasPartner || "";
+
+			document.getElementById("f_likes").value = c.like || "";
+			document.getElementById("f_ng_topics").value = c.ng || "";
+			document.getElementById("f_memo").value = c.memo || "";
+
+			// 削除ボタンON
+			const delBtn = document.getElementById("deleteCustomerBtn");
+			if (delBtn) {
+				delBtn.disabled = false;
+				delBtn.style.opacity = "1";
+			}
+		}
+
+		// フォーム → APIオブジェクトに変換
+		function buildCustomerFromForm(base) {
+			const obj = base ? { ...base } : {};
+
+			obj.cast         = cast || "";
+			obj.castDisplay  = castDisplayName(cast);
+			obj.customerName = document.getElementById("f_display_name").value.trim();
+			obj.heartRank    = tempOsareLevel;
+			obj.exchangeContact = document.getElementById("f_has_contact").checked;
+
+			obj.lastVisit    = document.getElementById("f_last_visit").value.trim();
+			obj.birthday     = document.getElementById("f_birthday").value.trim();
+			obj.bloodType    = document.getElementById("f_blood").value.trim();
+			obj.age          = document.getElementById("f_age").value.trim();
+			obj.favoriteAlcohol = document.getElementById("f_drink").value.trim();
+			obj.smoking      = document.getElementById("f_smoke").value;
+
+			obj.firstVisit   = document.getElementById("f_first_visit").value.trim();
+			obj.entryReason  = document.getElementById("f_how_found").value.trim();
+			obj.visitCount   = Number(document.getElementById("f_visit_count").value || "0");
+			obj.visitFrequency = document.getElementById("f_visit_pattern").value.trim();
+
+			obj.area         = document.getElementById("f_area").value.trim();
+			obj.job          = document.getElementById("f_job").value.trim();
+			obj.hasPartner   = document.getElementById("f_has_partner").value;
+
+			obj.like         = document.getElementById("f_likes").value.trim();
+			obj.ng           = document.getElementById("f_ng_topics").value.trim();
+			obj.memo         = document.getElementById("f_memo").value.trim();
+
+			return obj;
+		}
+
+		async function saveCurrentForm(){
+			if (!cast) {
+				alert("cast パラメータがありません（?cast=saki みたいに付けてね）");
+				return;
+			}
+
+			// ★ 保存前の lastVisit を控える
+			const prevLastVisit =
+				(editingIndex >= 0 && customers[editingIndex])
+				? (customers[editingIndex].lastVisit || "")
+				: "";
+
+			// 既存オブジェクトがあれば引き継ぎ（特に id）
+			const base  = (editingIndex >= 0) ? customers[editingIndex] : null;
+			const newObj = buildCustomerFromForm(base);
+
+			try {
+				const json = await saveCustomerToServer(newObj);
+				if (json.status !== "ok") {
+					console.error("save error:", json);
+					alert("保存に失敗しました…(´;ω;｀)");
+					return;
+				}
+
+				// 新規のときは API 側で付与された id を反映
+				if (json.id) {
+					newObj.id = json.id;
+				}
+
+				// いったん customers に反映
+				if (editingIndex === -1) {
+					customers.push(newObj);
+				} else {
+					customers[editingIndex] = newObj;
+				}
+
+				// ★ここから：並び替え後の index を取り直す
+				const savedId = newObj.id;
+				applySortAndRender();  // 並び替え & 再描画
+
+				const newIndex = customers.findIndex(c => c.id === savedId);
+				if (newIndex !== -1) {
+					editingIndex = newIndex;
+					loadToForm(editingIndex);
+				}
+
+				alert("保存しました💗");
+
+
+				// ★★★ ここから：最終来店日を手で変えたら visitlog も自動追加 ★★★
+				const newLastVisit = newObj.lastVisit || "";
+				if (newLastVisit && newLastVisit !== prevLastVisit && newObj.id) {
+					try {
+						const vRes = await fetch(`${API_URL}?mode=visitlog`, {
+							method: "POST",
+							body: JSON.stringify({
+								cast: cast,
+								customerId: newObj.id,
+								visitDate: newLastVisit
+							})
+						});
+						const vJson = await vRes.json();
+						if (vJson.status !== "ok") {
+							console.error("visitlog on save error:", vJson);
+						} else {
+							console.log("visitlog added from save:", vJson);
+
+							// カレンダーがその月を表示していれば更新（あればラッキーくらいのノリ）
+							if (currentCalYear && currentCalMonth) {
+								const y = Number(newLastVisit.slice(0, 4));
+								const m = Number(newLastVisit.slice(5, 7));
+								if (y === currentCalYear && m === currentCalMonth) {
+									await loadCalendar(currentCalYear, currentCalMonth);
+								}
+							}
+						}
+					} catch (err2) {
+						console.error("visitlog on save fetch error:", err2);
+					}
+				}
+
+			} catch (err) {
+				console.error("save fetch error:", err);
+				alert("通信エラーで保存できませんでした…");
+			}
+		}
+
+
+		async function deleteCurrentCustomer(){
+			if (editingIndex === -1) {
+				alert("まだ保存されてないお客さんは削除できません🙇‍♀️");
+				return;
+			}
+
+			const c = customers[editingIndex];
+			const targetName = c.customerName || "このお客さん";
+
+			const ok = confirm(targetName + " を削除しますか？");
+			if (!ok) return;
+
+			try {
+				const json = await deleteCustomerOnServer(c.id);
+				if (json.status !== "ok") {
+					console.error("delete error:", json);
+					alert("削除に失敗しました…");
+					return;
+				}
+
+				customers.splice(editingIndex, 1);
+				applySortAndRender();  // ←削除後も並び順を更新
+				clearForm();
+				alert("削除しました");
+
+			} catch (err) {
+				console.error("delete fetch error:", err);
+				alert("通信エラーで削除できませんでした…");
+			}
+		}
+
+		// ========= イベント =========
+		document.getElementById("addCustomerBtn").addEventListener("click", ()=>{
+			clearForm();
+		});
+
+		document.getElementById("saveCustomerBtn").addEventListener("click", ()=>{
+			saveCurrentForm();
+		});
+
+		document.getElementById("deleteCustomerBtn").addEventListener("click", ()=>{
+			deleteCurrentCustomer();
+		});
+
+		// ★ 今日の来店ログボタン
+		document.getElementById("logTodayBtn").addEventListener("click", function () {
+			logTodayVisit();
+		});
+
+		// 並び替え変更時
+const sortSelect = document.getElementById("sortMode");
+if (sortSelect) {
+  sortSelect.addEventListener("change", () => {
+    renderCustomerList();
+  });
+}
+
+// 検索ボタン & Enter
+const searchInput = document.getElementById("searchKeyword");
+const searchBtn   = document.getElementById("searchRunBtn");
+
+function runSearch() {
+  if (!searchInput) return;
+  searchKeyword = searchInput.value || "";
+  renderCustomerList();
+}
+
+if (searchBtn && searchInput) {
+  searchBtn.addEventListener("click", runSearch);
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      runSearch();
+    }
+  });
+}
+		// ========= カレンダーからプロフ編集画面を開く =========
+function openCustomerProfile(customerId) {
+  if (!customerId) return;
+
+  // customerIndexMap が customerId -> index になってる前提
+  const idx = customerIndexMap[customerId];
+
+  if (idx == null) {
+    alert("このお客さんのプロフィールが一覧に見つからなかった…（一度リロードしてみて🙏）");
+    return;
+  }
+
+  loadToForm(idx);
+
+  // 編集エリアへスッと移動
+  const editCard = document.querySelector(".edit-card");
+  if (editCard) {
+    editCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function openCustomerFromVisit(customerId) {
+  const idx = customerIndexMap[customerId];
+  if (idx == null) {
+    alert("プロフィール一覧に見つからなかったよ…（一覧を先に読み込めてるか確認してね）");
+    return;
+  }
+
+  loadToForm(idx);
+
+  // プロフ編集までスクロール
+  const editCard = document.querySelector(".edit-card");
+  if (editCard) editCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+
+
+		// ========= 初期ロード =========
+		(async function init(){
+			if (!cast) {
+				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
+			}
+
+			initStaticUI();
+			setupOsarePicker();
+			renderOsarePicker();
+
+			// ★ カレンダー初期表示（今月）
+			var now = new Date();
+			currentCalYear  = now.getFullYear();
+			currentCalMonth = now.getMonth() + 1;
+			await loadCalendar(currentCalYear, currentCalMonth);
+
+			// 月送りボタン
+			var prevBtn = document.getElementById("calPrevBtn");
+			var nextBtn = document.getElementById("calNextBtn");
+
+			if (prevBtn) {
+				prevBtn.addEventListener("click", function () {
+					var y = currentCalYear;
+					var m = currentCalMonth - 1;
+					if (m < 1) {
+						m = 12;
+						y--;
+					}
+					loadCalendar(y, m);
+				});
+			}
+
+			if (nextBtn) {
+				nextBtn.addEventListener("click", function () {
+					var y = currentCalYear;
+					var m = currentCalMonth + 1;
+					if (m > 12) {
+						m = 1;
+						y++;
+					}
+					loadCalendar(y, m);
+				});
+			}
+
+			await fetchCustomerList();  // ★GASから一覧取得
+			applySortAndRender();       // ←並び替えしてから表示
+			clearForm();
+		})();
+
+	</script>
+
+</body>
+</html>

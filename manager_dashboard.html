@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>店長ダッシュボード♪</title>
+	<link rel="stylesheet" href="assets/common.css">
+	<link rel="stylesheet" href="assets/manager_dashboard.css">
+</head>
+
+
+<body>
+	<div class="app-shell">
+
+        <div class="admin-controls">
+			<a id="journalLink" href="manager_journal.html">📓 交換日記へ</a>
+			<div class="cast-select-wrap">
+				<span class="ctl-label">キャスト</span>
+				<select id="castSelect"></select>
+			</div>
+		</div>
+
+        <!-- ヘッダー -->
+        <header class="header-card">
+
+            <!-- 1段目：左＝タイトル＋ピル / 右＝キャスト切替 -->
+            <div class="header-row1">
+                <div class="header-left">
+                    <div class="cast-pill">
+                        🎀<span id="castName">[なまえ]の進捗状況</span>🎀
+                    </div>
+                </div>
+            </div>
+            <!-- 2段目：出勤サマリー（センター） -->
+            <div class="header-row2">
+                <div class="header-row2-main">
+                    出勤 <span id="pv_shiftCount">0</span>回目 /
+                    あと<span id="pv_shiftLeft">30</span>回
+                </div>
+            </div>
+            <!-- 3段目：スタート＋達成バッジ（センター） -->
+            <div class="header-row3">
+                <span class="header-start">
+                    スタート: <span id="pv_startDate">2025-10-01</span>
+                </span>
+                <span class="summary-badge">
+                    達成 <span id="pv_completedCount">0</span> / <span id="pv_totalGoals">13</span>
+                </span>
+            </div>
+
+        </header>
+
+		<div class="margin-top"></div>
+
+		<!-- キャスト側の見え方プレビュー -->
+		<section>
+			<div class="pv-section">
+				<div class="pv-title">🌟 メインクエスト</div>
+				<ul class="pv-list">
+					<li>お客さん5人と連絡先交換：<span class="pv-val" id="pv_main_contact">0</span> / 5</li>
+					<li>お客さん3組呼ぶ（来店につなげる）：<span class="pv-val" id="pv_main_call">0</span> / 3</li>
+					<li>同伴1件達成：
+						<span class="pv-val" id="pv_main_dinner">
+							未
+						</span>
+					</li>
+				</ul>
+				<hr/>
+				<div class="pv-title">📱 SNS・セルフプロデュース</div>
+				<ul class="pv-list">
+					<li>インスタ／X／TikTok開設：
+						<span class="pv-val" id="pv_sns_open">未</span>
+					</li>
+					<li>週2以上投稿キープ（毎週がんばってね❤️‍🔥）：<span class="pv-val" id="pv_sns_weekpost">0</span> / 4</li>
+					<li>出勤日は「今日いるよ🎶」ってストーリー・ポストで出勤アピール（毎日💗）：<span class="pv-val" id="pv_sns_story">0</span> / 30</li>
+					<li>他のスタッフの投稿を見ていいね・コメントで交流：
+						<span class="pv-val" id="pv_sns_interact">未</span>
+					</li>
+					<li>総フォロワー50人達成（インスタ+X+TikTok合計）：
+						<span class="pv-val" id="pv_sns_followers">未</span>
+					</li>
+				</ul>
+<hr/>
+				<div class="pv-title">💬 コミュニケーション力アップ</div>
+				<ul class="pv-list">
+					<li>初来店のお礼メッセージを送る（送れた人数分💗）：<span class="pv-val" id="pv_line_thanks">0</span> / 5</li>
+					<li>お客さんとメッセージ3往復以上ラリーを続ける：
+						<span class="pv-val" id="pv_line_rally">未</span>
+					</li>
+					<li>トークデッキを作る（話題ネタを3つ以上ストック）：
+						<span class="pv-val" id="pv_talkdeck">未</span>
+					</li>
+				</ul>
+<hr/>
+				<div class="pv-title">🪞 営業マインド＆フィードバック</div>
+				<ul class="pv-list">
+					<li>よかった点・反省点を毎週メモ（書けた週ごと💗）：
+						<span class="pv-val" id="pv_reflection">0</span> / 4
+					</li>
+					<li>お客さんのプロフィール帳を作る：
+						<span class="pv-val" id="pv_customer_profile">0</span> / 10
+					</li>
+				</ul>
+			</div>
+		</section>
+
+
+		<!-- 編集フォーム -->
+		<section class="edit-card">
+			<div class="edit-title">
+				✍ 更新フォーム
+				<small style="font-size:.7rem; font-weight:500; color:#a07799;">
+					数字をいじって「反映する」を押すと上に反映＆シート保存されます
+				</small>
+			</div>
+
+			<br>
+
+			<!-- 基本情報 -->
+			<div class="edit-row">
+
+				<div class="triple-grid">
+					<div class="basic-item">
+						<label>スタート日</label>
+						<input type="date" id="f_start_date" value="2025-10-01" />
+					</div>
+					<div class="basic-item">
+						<label>出勤回数</label>
+						<input type="number" id="f_shift_count" value="0" min="0" />
+						<small>出勤したら+1する</small>
+					</div>
+					<div class="basic-item">
+						<label>ゴール出勤回数</label>
+						<input type="number" id="f_goal_shift_total" value="30" min="1" />
+						<small>基本30のままでOK</small>
+					</div>
+				</div>
+			</div>
+
+			<hr/>
+
+			<!-- メインクエスト -->
+			<div class="edit-row">
+
+				<div class="section-title">🌟 メインクエスト</div>
+
+				<div class="triple-grid">
+					<div class="quest-item">
+						<label>5人連絡先GET</label>
+						<div class="pill-input">
+							<input type="number" id="f_main_contact5_done" value="0" min="0" max="5" />
+							<span>/5 💗</span>
+						</div>
+						<small>5人以上と交換できたらクリア</small>
+					</div>
+
+					<div class="quest-item">
+						<label>3組来店</label>
+						<div class="pill-input">
+							<input type="number" id="f_main_call3_done" value="0" min="0" max="3" />
+							<span>/3 💗</span>
+						</div>
+						<small>3組来てくれたらクリア</small>
+					</div>
+
+					<div class="quest-item">
+						<label>同伴1件</label>
+						<button class="toggle-flag" id="t_main_dohan1_done">未</button>
+						<small>1件できたらクリア</small>
+					</div>
+				</div>
+
+			</div>
+
+			<hr/>
+
+		<!-- SNS -->
+    	<div class="edit-row">
+			<div class="section-title">📱 SNS・セルフプロデュース</div>
+
+			<div class="triple-grid">
+				<div class="quest-item">
+    				<label>SNS開設</label>
+    				<button class="toggle-flag" id="t_sns_opened">未</button>
+    				<small>アカウント作れたらクリア</small>
+  				</div>
+			
+				<div class="quest-item">
+        			<label>週2投稿</label>
+					<div class="pill-input">
+						<input type="number" id="f_weeks_hearts" value="0" min="0" max="4" />
+						<span>/4 💗</span>
+					</div>
+					<small>1週間ちゃんとやれたら+1</small>
+    			</div>
+
+				<div class="quest-item">
+					<label>出勤アピール</label>
+					<div class="pill-input">
+						<input type="number" id="f_story_count" value="0" min="0" max="30" />
+						<span>/30 💗</span>
+					</div>
+					<small>「今日いるよ🎶」の投稿数</small>
+				</div>
+      		
+				<div class="quest-item">
+    	    		<label>他スタッフ交流</label>
+        			<button class="toggle-flag" id="t_sns_interact_others">未</button>
+					<small>他スタッフにいいね・コメント</small>
+				</div>
+
+      			<div class="quest-item">
+        			<label>フォロワー50人</label>
+        			<button class="toggle-flag" id="t_sns_followers50_done">未</button>
+					<small>総フォロワー50人達成でクリア</small>
+				</div>
+
+				<!-- 3列目の余りスペースは今は空きスロットにしておく -->
+        		<div class="quest-item">
+        			<label>&nbsp;</label>
+        			<small style="color:#a07799;"></small>
+        		</div>
+			</div>
+
+    	</div>
+
+		<hr/>
+
+		<!-- コミュニケーション -->
+		<div class="edit-row">
+			<div class="section-title">💬 コミュニケーション力アップ</div>
+
+			<div class="triple-grid">
+	  			<div class="edit-item">
+	    			<label>お礼🐾初メッセ</label>
+	    			<div class="pill-input">
+	      				<input type="number" id="f_line_thanks" value="0" min="0" max="5" />
+ 	     				<span>/5 💗</span>
+ 		   			</div>
+    				<small>送れた人数分+1</small>
+				</div>
+
+				<div class="edit-item">
+    				<label>メッセージ3往復</label>
+    				<button class="toggle-flag" id="t_line_3rally">未</button>
+    				<small>1回以上できたらクリア</small>
+  				</div>
+
+				<div class="edit-item">
+					<label>トークデッキ作成</label>
+    				<button class="toggle-flag" id="t_talkdeck_ready">未</button>
+    				<small>ネタ3つ以上ストックでクリア</small>
+  				</div>
+			</div>
+
+		</div>
+	
+		<hr/>
+
+		<!-- フィードバック -->
+    	<div class="edit-row">
+      		<div class="section-title">🪞 営業マインド＆フィードバック</div>
+			
+			<div class="triple-grid">
+				<div class="quest-item">
+        			<label>振り返り日記</label>
+					<div class="pill-input">
+						<input type="number" id="f_reflect_hearts" value="0" min="0" max="4" />
+						<span>/4 💗</span>
+					</div>
+					<small>1週間ちゃんとやれたら+1</small>
+    			</div>
+
+				<div class="quest-item">
+        			<label>お客さんプロフ帳</label>
+					<div class="pill-input">
+						<input type="number" id="f_customer_profile" value="0" min="0" max="10" />
+						<span>/4 💗</span>
+					</div>
+					<small>10人分つくれたら達成</small>
+    			</div>
+			</div>
+
+		</div>
+
+		<div class="edit-row">
+			<div style="margin-top:1rem;">
+    			<button class="btn-apply" id="applyBtn">反映する</button>
+			</div>
+    	</div>
+	</section>
+
+  	<div class="hint-box">
+    	※このページは店長だけの管理用（キャストに見せないでね）<br/>
+    	※「反映する」を押すとスプレッドシートにも保存されます💗
+  	</div>
+
+	<script>
+		// ★ここをデプロイした exec URL にする
+		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+
+
+		// 全キャストのデータを一時的に持つ
+		let roster = {};      // { "さきちゃん": {...}, "かえでちゃん": {...}, ... }
+		let currentKey = "";  // 今選ばれている displayName
+		const TOTAL_GOALS = 13; // 達成数の分母
+
+		/* ========= ヘルパー ========= */
+
+		// トグルボタンの見た目を更新
+		function applyToggleStyle(btn, isOn) {
+			if (!btn) return;
+			if (isOn) {
+			    btn.classList.add("done");
+			    btn.textContent = "クリア💗";
+		    } else {
+			    btn.classList.remove("done");
+			    btn.textContent = "未";
+		    }
+		}
+
+		// 数字からトグルのON/OFFを決めて反映
+		function refreshToggleUI(data) {
+			applyToggleStyle(
+			    document.getElementById("t_main_dohan1_done"),
+			    Number(data.mainDinner || 0) >= 1
+			);
+			applyToggleStyle(
+			    document.getElementById("t_sns_opened"),
+			    Number(data.snsOpen || 0) >= 1
+		    );
+		    applyToggleStyle(
+			    document.getElementById("t_sns_interact_others"),
+			    Number(data.snsInteract || 0) >= 1
+		    );
+		    applyToggleStyle(
+			    document.getElementById("t_sns_followers50_done"),
+			    Number(data.snsFollowers || 0) >= 50
+		    );
+		    applyToggleStyle(
+			    document.getElementById("t_line_3rally"),
+			    Number(data.lineRally || 0) >= 1
+		    );
+		    applyToggleStyle(
+			    document.getElementById("t_talkdeck_ready"),
+			    Number(data.talkdeck || 0) >= 1
+		    );
+		}
+
+		// キャスト1人分を画面に反映
+		function renderCast() {
+		    const data = roster[currentKey];
+		    if (!data) return;
+
+		    // 上のピルの名前
+		    const nameToShow = data.displayName || data.name || "[なまえ]";
+			document.getElementById("castName").textContent =
+			nameToShow + "の進捗状況";
+
+    		// 出勤状況
+    		document.getElementById("pv_shiftCount").textContent = data.shiftCount || 0;
+    		document.getElementById("pv_shiftLeft").textContent =
+    		data.shiftRemaining != null ? data.shiftRemaining : 0;
+
+    		// スタート日（まだないなら ----）
+    		document.getElementById("pv_startDate").textContent =
+    		data.startDate || data.start_date || "----";
+
+			// フォームのスタート日も反映
+document.getElementById("f_start_date").value =
+    data.startDate || data.start_date || "";
+
+
+    		// 達成フラグざっくり（大きめクエスト用）
+    		const flags = [
+    			(Number(data.mainContact) || 0) >= 5,
+    			(Number(data.mainCall) || 0) >= 3,
+    			(Number(data.mainDinner) || 0) >= 1,
+    			(Number(data.snsOpen) || 0) >= 1,
+    			(Number(data.snsFollowers) || 0) >= 50,
+    			(Number(data.lineRally) || 0) >= 1,
+    			(Number(data.talkdeck) || 0) >= 1,
+    			(Number(data.weeklyReflection) || 0) >= 4,
+    			(Number(data.customerProfile) || 0) >= 10,
+    			(Number(data.snsWeekpost) || 0) >= 4,
+    			(Number(data.snsDaystory) || 0) >= 10,
+    			(Number(data.lineThanks) || 0) >= 5,
+    			(Number(data.snsInteract) || 0) >= 1
+    		];
+
+		    const doneCount = flags.filter(Boolean).length;
+		    const totalCount = TOTAL_GOALS;
+
+		    document.getElementById("pv_completedCount").textContent = doneCount;
+		    document.getElementById("pv_totalGoals").textContent = totalCount;
+
+			// ▼▼ プレビューカードへの反映 ▼▼
+			// メインクエスト
+			document.getElementById("pv_main_contact").textContent =
+    			data.mainContact || 0;
+			document.getElementById("pv_main_call").textContent =
+			    data.mainCall || 0;
+			document.getElementById("pv_main_dinner").textContent =
+			    (Number(data.mainDinner) || 0) >= 1 ? "クリア💗" : "未";
+
+			// SNS・セルフプロデュース
+			document.getElementById("pv_sns_story").textContent =
+    			data.snsDaystory || 0;
+			document.getElementById("pv_sns_weekpost").textContent =
+			    data.snsWeekpost || 0;
+			document.getElementById("pv_sns_open").textContent =
+			    (Number(data.snsOpen) || 0) >= 1 ? "クリア💗" : "未";
+			document.getElementById("pv_sns_interact").textContent =
+			    (Number(data.snsInteract) || 0) >= 1 ? "クリア💗" : "未";
+			document.getElementById("pv_sns_followers").textContent =
+			    (Number(data.snsFollowers) || 0) >= 50 ? "クリア💗" : "未";
+
+			// コミュニケーション
+			document.getElementById("pv_line_thanks").textContent =
+			    data.lineThanks || 0;
+			document.getElementById("pv_line_rally").textContent =
+			    (Number(data.lineRally) || 0) >= 1 ? "クリア💗" : "未";
+			document.getElementById("pv_talkdeck").textContent =
+			    (Number(data.talkdeck) || 0) >= 1 ? "クリア💗" : "未";
+
+			// 営業マインド＆フィードバック
+			document.getElementById("pv_reflection").textContent =
+    			data.weeklyReflection || 0;
+			document.getElementById("pv_customer_profile").textContent =
+			    data.customerProfile || 0;
+
+		    // フォームの値も反映
+		    document.getElementById("f_shift_count").value = data.shiftCount || 0;
+    		document.getElementById("f_goal_shift_total").value =
+    		(data.shiftRemaining != null && data.shiftCount != null)
+    	    ? Number(data.shiftCount) + Number(data.shiftRemaining)
+    		: 30;
+
+    		document.getElementById("f_main_contact5_done").value = data.mainContact || 0;
+    		document.getElementById("f_main_call3_done").value    = data.mainCall || 0;
+    		document.getElementById("f_weeks_hearts").value       = data.snsWeekpost || 0;
+    		document.getElementById("f_story_count").value        = data.snsDaystory || 0;
+    		document.getElementById("f_line_thanks").value        = data.lineThanks || 0;
+    		document.getElementById("f_reflect_hearts").value     = data.weeklyReflection || 0;
+    		document.getElementById("f_customer_profile").value   = data.customerProfile || 0;
+
+		    // トグル見た目
+    		refreshToggleUI(data);
+		}
+
+		/* ========= トグルのクリック処理 ========= */
+
+		// 1つのトグルボタンに「このフィールドを onValue/0 で切り替える」動きをつける
+		function setupToggle(id, field, onValue, offValue = 0) {
+		    const btn = document.getElementById(id);
+		    if (!btn) return;
+
+		    btn.addEventListener("click", () => {
+			    const d = roster[currentKey];
+			    if (!d) return;
+
+			    const isOn = Number(d[field] || 0) >= onValue;
+			    d[field] = isOn ? offValue : onValue;  // ON→OFF / OFF→ON
+
+			    refreshToggleUI(d);
+			    renderCast();  // 上の達成カウントなども更新
+    		});
+		}
+
+		function setupAllToggles() {
+ 			// メインクエスト（同伴のみトグル）
+    		setupToggle("t_main_dohan1_done", "mainDinner", 1);
+
+		    // SNS
+		    setupToggle("t_sns_opened",           "snsOpen",      1);
+		    setupToggle("t_sns_interact_others",  "snsInteract",  1);
+		    setupToggle("t_sns_followers50_done", "snsFollowers", 50);
+
+		    // コミュ力
+		    setupToggle("t_line_3rally",    "lineRally", 1);
+		    setupToggle("t_talkdeck_ready", "talkdeck",  1);
+		}
+
+		/* ========= 「反映する」ボタン ========= */
+		function setupApplyHandler() {
+		    const btn = document.getElementById("applyBtn");
+		    btn.addEventListener("click", async () => {
+		    	if (!currentKey) return;
+			    const d = roster[currentKey];
+
+			    // フォーム入力からローカルデータを更新
+				const startDate       = document.getElementById("f_start_date").value || "";
+			    const shiftCount      = Number(document.getElementById("f_shift_count").value || 0);
+			    const goalShiftTotal  = Number(document.getElementById("f_goal_shift_total").value || 30);
+			    const mainContact     = Number(document.getElementById("f_main_contact5_done").value || 0);
+			    const mainCall        = Number(document.getElementById("f_main_call3_done").value || 0);
+			    const snsWeekpost     = Number(document.getElementById("f_weeks_hearts").value || 0);
+			    const snsDaystory     = Number(document.getElementById("f_story_count").value || 0);
+			    const lineThanks      = Number(document.getElementById("f_line_thanks").value || 0);
+			    const weeklyRefHearts = Number(document.getElementById("f_reflect_hearts").value || 0);
+			    const customerProfile = Number(document.getElementById("f_customer_profile").value || 0);
+
+				d.startDate        = startDate;
+			    d.shiftCount        = shiftCount;
+			    d.shiftRemaining    = Math.max(goalShiftTotal - shiftCount, 0);
+			    d.mainContact       = mainContact;
+			    d.mainCall          = mainCall;
+				d.snsWeekpost       = snsWeekpost;
+			    d.snsDaystory       = snsDaystory;
+		    	d.lineThanks        = lineThanks;
+			    d.weeklyReflection  = weeklyRefHearts;
+			    d.customerProfile   = customerProfile;
+
+		    	// 画面更新
+    			renderCast();
+
+    			// シートに送るデータ（progressのカラムと合わせてある）
+    			const payload = {
+    			    name: d.name,                       // A列（キー）：saki / kaede など
+					startDate: d.startDate || "",
+
+        			shiftCount: d.shiftCount || 0,
+    	    		shiftRemaining: d.shiftRemaining || 0,
+
+    	    		mainContact: d.mainContact || 0,
+    	    		mainCall: d.mainCall || 0,
+    	    		mainDinner: d.mainDinner || 0,
+
+	        		snsOpen: d.snsOpen || 0,
+	        		snsWeekpost: d.snsWeekpost || 0,
+    	    		snsDaystory: d.snsDaystory || 0,
+        			snsInteract: d.snsInteract || 0,
+        			snsFollowers: d.snsFollowers || 0,
+
+			        lineThanks: d.lineThanks || 0,
+    			    lineRally: d.lineRally || 0,
+        			talkdeck: d.talkdeck || 0,
+
+	        		weeklyReflection: d.weeklyReflection || 0,
+    	    		customerProfile: d.customerProfile || 0
+    			};
+
+    			console.log("POST payload:", payload);
+
+	    		try {
+    	    		const res  = await fetch(API_URL, {
+        				method: "POST",
+        				body: JSON.stringify(payload)   // ★ヘッダは付けない（今まで通り）
+        			});
+        			const json = await res.json();
+        			console.log("POST result:", json);
+
+        			if (json.status === "ok") {
+        				alert("シートに保存しました✨");
+        			} else {
+        				alert("シート保存に失敗しました…コンソール見てみて！");
+        				console.error(json);
+        			}
+    				} catch (err) {
+        				console.error("POST error:", err);
+        				alert("通信エラーで保存できませんでした(´;ω;｀)");
+      				}
+    		});
+		}
+
+		/* ========= 全キャスト読み込み（?admin=1） ========= */
+		async function loadCasts() {
+  try {
+    const res  = await fetch(`${API_URL}?admin=1`);
+    const json = await res.json();      // ← ここで {status, data} を受け取る
+    console.log("admin data:", json);
+
+    // data が配列ならそれを使う
+    const list = Array.isArray(json.data) ? json.data : [];
+
+    const select = document.getElementById("castSelect");
+    select.innerHTML = "";
+
+    list.forEach(item => {
+      const key = item.displayName || item.name;
+      roster[key] = item;  // メモリに保持
+
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = key;
+      select.appendChild(opt);
+    });
+
+    if (list.length > 0) {
+      currentKey = list[0].displayName || list[0].name;
+      select.value = currentKey;
+      renderCast();
+    }
+
+    // プルダウン変更時
+    select.addEventListener("change", (e) => {
+      currentKey = e.target.value;
+      renderCast();
+    });
+
+  } catch (err) {
+    console.error("取得エラー:", err);
+  }
+}
+
+
+		/* ========= 起動 ========= */
+
+		window.addEventListener("DOMContentLoaded", () => {
+		    setupAllToggles();
+    		setupApplyHandler();
+    		loadCasts();
+		});
+	</script>
+
+</body>
+</html>

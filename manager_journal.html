@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>店長★交換日記カレンダー</title>
+	<link rel="stylesheet" href="assets/common.css">
+	<link rel="stylesheet" href="assets/manager_journal.css" />
+</head>
+
+<body>
+	<div class="app-shell">
+
+		<!-- ヘッダー -->
+		<header class="header-card">
+			<div class="header-top">
+				<div class="header-title">
+					📓 店長用・交換日記カレンダー
+				</div>
+			</div>
+
+			<div class="header-filters">
+				<div>
+					<label for="castFilter">キャスト</label>
+					<select id="castFilter">
+						<option value="">全キャスト</option>
+					</select>
+				</div>
+				<div>
+					<label for="statusFilter">ステータス</label>
+					<select id="statusFilter">
+						<option value="">全部</option>
+						<option value="new">未返信だけ</option>
+						<option value="replied">返信済みだけ</option>
+					</select>
+				</div>
+			</div>
+		</header>
+
+		<div class="main-grid">
+			<!-- カレンダー（プロフ帳と揃えた版） -->
+			<section class="calendar-card">
+				<div class="calendar-header">
+					<button class="cal-nav" id="calPrevBtn">◀</button>
+					<div class="calendar-title" id="calTitle">2025年1月</div>
+					<button class="cal-nav" id="calNextBtn">▶</button>
+				</div>
+
+				<!-- 曜日＋日付のグリッド -->
+				<div class="calendar-grid" id="calendarGrid">
+				<!-- JSで埋める -->
+				</div>
+
+				<!-- カレンダーの説明 -->
+				<div id="calendarInfo" class="calendar-detail">
+					日付をタップすると、その日の交換日記が下に出るよ📓
+				</div>
+			</section>
+
+			<!-- 日記リスト -->
+			<section class="card">
+				<div id="dayTitle" class="day-title">
+					日付を選んでね📅
+				</div>
+				<div id="entryList" class="entry-list">
+					<div class="entry-empty">
+						まだ日付が選ばれていません。
+					</div>
+				</div>
+			</section>
+
+			<!-- 店長リプライ入力フォーム（スライドイン） -->
+			<div id="replyPanel" class="reply-panel">
+				<div class="reply-inner">
+					<div class="reply-header">
+						<div class="reply-title">店長リプライ💌</div>
+						<button type="button" id="btnReplyClose" class="reply-close">×</button>
+					</div>
+
+					<div class="reply-target" id="replyTargetInfo">
+						（だれの日記に返信中かここに出る）
+					</div>
+
+					<div class="reply-bubble">
+						<div class="reply-avatar">店</div>
+						<div class="reply-bubble-body">
+							<textarea
+								id="replyInput"
+								rows="3"
+								placeholder="ひとことでもOK🫶 『今日も来てくれてありがとう！』とか送ってみよ〜"
+							></textarea>
+						</div>
+					</div>
+
+					<button id="btnReplySend" class="btn-reply-send">
+						この内容で送る💫
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer-nav">
+			<a id="backLink" class="back-link" href="manager_dashboard.html">
+				← 店長ダッシュボードにもどる
+			</a>
+		</div>
+	</div>
+
+	<script>
+		// ★ここをスーパーAPIのURLに
+		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+
+		let allEntries = [];
+		let currentYear;
+		let currentMonth;
+		let selectedDate = "";
+
+		const castFilterEl   = document.getElementById("castFilter");
+		const statusFilterEl = document.getElementById("statusFilter");
+		const calendarGrid   = document.getElementById("calendarGrid");
+		const calTitle       = document.getElementById("calTitle");
+		const calendarInfo   = document.getElementById("calendarInfo");
+		const dayTitle       = document.getElementById("dayTitle");
+		const entryListEl    = document.getElementById("entryList");
+
+		function formatYmd(y,m,d){
+			const mm = ("0"+m).slice(-2);
+			const dd = ("0"+d).slice(-2);
+			return y + "-" + mm + "-" + dd;
+		}
+
+		function castDisplayName(id){
+  if (id === "saki")  return "さきちゃん";
+  if (id === "kaede") return "かえでちゃん";
+  if (id === "mea")   return "めあちゃん";
+  if (id === "oto")   return "おとちゃん";
+  if (id === "maru")  return "まるちゃん";
+  return id || "なまえ未設定";
+}
+
+		function buildCastFilter() {
+			const set = new Set();
+			allEntries.forEach(e => {
+				if (e.cast) set.add(e.cast);
+			});
+			castFilterEl.innerHTML = '<option value="">全キャスト</option>';
+			Array.from(set).sort().forEach(c => {
+				const opt = document.createElement("option");
+				opt.value = c;
+				opt.textContent = castDisplayName(c);
+				castFilterEl.appendChild(opt);
+			});
+		}
+
+		function getEntriesForDate(dateStr) {
+			const castFilter   = castFilterEl.value;
+			const statusFilter = statusFilterEl.value;
+			return allEntries.filter(e => {
+				if (e.entryDate !== dateStr) return false;
+				if (castFilter && e.cast !== castFilter) return false;
+				if (statusFilter === "new" && e.status === "replied") return false;
+				if (statusFilter === "replied" && e.status !== "replied") return false;
+				return true;
+			});
+		}
+
+		function renderCalendar() {
+			// タイトル（2025年12月）
+			calTitle.textContent = `${currentYear}年 ${currentMonth}月`;
+
+			// 中身クリア
+			calendarGrid.innerHTML = "";
+
+			// 念のためここでグリッド指定（CSSが壊れてても保険になる）
+			calendarGrid.style.display = "grid";
+			calendarGrid.style.gridTemplateColumns = "repeat(7, 1fr)";
+			calendarGrid.style.gap = ".25rem";
+
+			// 1行目：曜日
+			const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+			weekdays.forEach(w => {
+				const wEl = document.createElement("div");
+				wEl.className = "cal-weekday";
+				wEl.textContent = w;
+				calendarGrid.appendChild(wEl);
+			});
+
+			// 日付計算
+			const first    = new Date(currentYear, currentMonth - 1, 1);
+			const startDay = first.getDay();                  // 0(日)〜6(土)
+			const lastDate = new Date(currentYear, currentMonth, 0).getDate();
+
+			let cellIndex = 0;
+
+			// 先頭の空白（前月ぶん）
+			for (let i = 0; i < startDay; i++) {
+				const empty = document.createElement("div");
+				empty.className = "calendar-day empty";
+				calendarGrid.appendChild(empty);
+				cellIndex++;
+			}
+
+			// 今日判定用
+			const today = new Date();
+			const todayStr = formatYmd(
+				today.getFullYear(),
+				today.getMonth() + 1,
+				today.getDate()
+			);
+
+			// 日付セル
+			for (let d = 1; d <= lastDate; d++) {
+				const dateStr = formatYmd(currentYear, currentMonth, d);
+
+				const dayEl = document.createElement("div");
+				dayEl.className = "calendar-day";
+				dayEl.dataset.date = dateStr;
+
+				// 今日ハイライト
+				if (dateStr === todayStr) {
+					dayEl.classList.add("today");
+				}
+
+				// 選択中ハイライト
+				if (selectedDate === dateStr) {
+					dayEl.classList.add("selected");
+				}
+
+				// 日付数字
+				const numEl = document.createElement("div");
+				numEl.className = "calendar-day-num";
+				numEl.textContent = d;
+				dayEl.appendChild(numEl);
+
+				// 件数バッジ
+				const count = getEntriesForDate(dateStr).length;
+				if (count > 0) {
+					const badge = document.createElement("div");
+					badge.className = "calendar-day-badge";
+					badge.textContent = count + "件";
+					dayEl.appendChild(badge);
+				}
+
+				// クリックでその日の日記を表示
+				dayEl.addEventListener("click", () => {
+					selectedDate = dateStr;
+					renderCalendar();   // ハイライト更新
+					renderDayEntries(); // 下のリスト更新
+				});
+
+				calendarGrid.appendChild(dayEl);
+				cellIndex++;
+			}
+
+			// 最後の行の余りセルを空白で埋める
+			const totalCells = Math.ceil(cellIndex / 7) * 7;
+			for (let i = cellIndex; i < totalCells; i++) {
+				const empty = document.createElement("div");
+				empty.className = "calendar-day empty";
+				calendarGrid.appendChild(empty);
+			}
+
+			// ★ 選択中の日付セルにキラッ演出クラスを付ける
+function highlightSelectedCell() {
+  if (!selectedDate) return;
+
+  const cells = document.querySelectorAll("[data-date]");
+  cells.forEach(cell => {
+    if (cell.dataset.date === selectedDate) {
+      cell.classList.add("is-selected");
+    } else {
+      cell.classList.remove("is-selected");
+    }
+  });
+}
+			highlightSelectedCell();
+		}
+
+
+		// ===== 店長リプライ専用フォーム =====
+		const replyPanel      = document.getElementById("replyPanel");
+		const replyInput      = document.getElementById("replyInput");
+		const replyTargetInfo = document.getElementById("replyTargetInfo");
+		const btnReplySend    = document.getElementById("btnReplySend");
+		const btnReplyClose   = document.getElementById("btnReplyClose");
+
+		let currentReplyId = null;
+
+		function openReplyForm(item) {
+			currentReplyId = item.id;
+			replyTargetInfo.textContent =
+			(item.entryDate || item.createdAt || "") + " ／ " + (item.cast || "") + " の日記に返信";
+
+			replyInput.value = item.reply || "";
+			replyPanel.classList.add("is-open");
+			replyInput.focus();
+		}
+
+		function closeReplyForm() {
+			replyPanel.classList.remove("is-open");
+			replyInput.value = "";
+			replyTargetInfo.textContent = "";
+			currentReplyId = null;
+		}
+
+		btnReplyClose.addEventListener("click", () => {
+			closeReplyForm();
+		});
+
+		btnReplySend.addEventListener("click", async () => {
+			const text = replyInput.value.trim();
+			if (!text) {
+				alert("なにか入力してね！");
+				return;
+			}
+			if (!currentReplyId) {
+			console.warn("currentReplyId が未設定のまま送信ボタンが押されたよ");
+		return;
+	  }
+
+	  try {
+		const res = await fetch(API_URL + "?mode=journal_reply", {
+		  method: "POST",
+		  body: JSON.stringify({
+			id:    currentReplyId,
+			reply: text
+		  })
+		});
+		const json = await res.json();
+		console.log("journal_reply:", json);
+
+		if (json.status === "ok") {
+		  await reloadEntriesKeepDate();
+		  closeReplyForm();
+		  alert("リプライを送信したよ✨");
+		} else {
+		  alert("更新に失敗しちゃった…");
+		}
+	  } catch (err) {
+		console.error(err);
+		alert("通信エラーで送信できませんでした");
+	  }
+	});
+
+	function renderDayEntries() {
+	  if (!selectedDate) {
+		dayTitle.textContent = "日付を選んでね📅";
+		entryListEl.innerHTML = '<div class="entry-empty">まだ日付が選ばれていません。</div>';
+		return;
+	  }
+
+	  const list = getEntriesForDate(selectedDate);
+	  dayTitle.textContent = selectedDate + " の交換日記";
+	  calendarInfo.textContent = "";
+
+	  if (!list.length) {
+		entryListEl.innerHTML = '<div class="entry-empty">この日はまだ日記がありません。</div>';
+		return;
+	  }
+
+	  entryListEl.innerHTML = "";
+	  list.forEach(item => {
+		const div = document.createElement("div");
+		div.className = "entry-item";
+
+		const headerRow = document.createElement("div");
+		headerRow.className = "entry-header-row";
+
+		const left = document.createElement("div");
+		left.innerHTML = `
+		  <div class="entry-cast">${castDisplayName(item.cast) || "(cast不明)"}</div>
+		  <div class="entry-date">${item.createdAt || ""}</div>
+		`;
+
+		const mood = document.createElement("div");
+		mood.className = "entry-mood";
+		mood.textContent = item.mood || "moodなし";
+
+		headerRow.appendChild(left);
+		headerRow.appendChild(mood);
+
+		const text = document.createElement("div");
+		text.className = "entry-text";
+		text.textContent = item.text || "";
+
+		div.appendChild(headerRow);
+		div.appendChild(text);
+
+		if (item.reply) {
+		  const replyBlock = document.createElement("div");
+		  replyBlock.className = "entry-reply-block";
+
+		  const label = document.createElement("div");
+		  label.className = "entry-reply-label";
+		  label.innerHTML = `
+			<span class="entry-reply-label-badge">店長</span>
+			<span>店長からのひとこと</span>
+		  `;
+
+		  const bubble = document.createElement("div");
+		  bubble.className = "entry-reply-bubble";
+		  bubble.textContent = item.reply;
+
+		  replyBlock.appendChild(label);
+		  replyBlock.appendChild(bubble);
+		  div.appendChild(replyBlock);
+		}
+
+		const status = document.createElement("div");
+		status.className = "entry-status";
+		if (item.status === "replied" && item.replyAt) {
+		  status.textContent = "✅ 店長返信済み（" + item.replyAt + "）";
+		  status.classList.add("replied");
+		} else {
+		  status.textContent = "⏳ 未返信";
+		}
+		div.appendChild(status);
+
+		const actions = document.createElement("div");
+		actions.className = "entry-actions";
+
+		const replyBtn = document.createElement("button");
+		replyBtn.className = "btn-sm reply";
+		replyBtn.textContent = "返信を書く";
+		replyBtn.addEventListener("click", () => {
+		  openReplyForm(item);
+		});
+
+		const btnDelete = document.createElement("button");
+		btnDelete.className = "btn-sm delete";
+		btnDelete.textContent = "削除";
+		btnDelete.addEventListener("click", async () => {
+		  if (!confirm("この日記を削除してもいい？（元に戻せないよ）")) return;
+		  try {
+			const res = await fetch(API_URL + "?mode=journal_delete", {
+			  method: "POST",
+			  body: JSON.stringify({ id: item.id })
+			});
+			const json = await res.json();
+			console.log("journal_delete:", json);
+			if (json.status === "ok") {
+			  await reloadEntriesKeepDate();
+			  alert("削除しました🗑");
+			} else {
+			  alert("削除に失敗しちゃった…");
+			}
+		  } catch (err) {
+			console.error(err);
+			alert("通信エラーで削除できませんでした");
+		  }
+		});
+
+		actions.appendChild(replyBtn);
+		actions.appendChild(btnDelete);
+
+		div.appendChild(actions);
+
+		entryListEl.appendChild(div);
+	  });
+	}
+
+	async function loadAllEntries() {
+	  entryListEl.innerHTML = '<div class="entry-empty">読み込み中…</div>';
+	  try {
+		const res = await fetch(API_URL + "?mode=journal_list");
+		const json = await res.json();
+		console.log("journal_list(manager):", json);
+		if (json.status !== "ok") {
+		  entryListEl.innerHTML = '<div class="entry-empty">読み込みに失敗しました…</div>';
+		  return;
+		}
+		allEntries = json.data || [];
+		buildCastFilter();
+	  } catch (err) {
+		console.error(err);
+		entryListEl.innerHTML = '<div class="entry-empty">読み込みに失敗しました…</div>';
+	  }
+	}
+
+	async function reloadEntriesKeepDate() {
+	  await loadAllEntries();
+	  renderCalendar();
+	  renderDayEntries();
+	}
+
+document.getElementById("calPrevBtn").addEventListener("click", () => {
+  currentMonth--;
+  if (currentMonth <= 0) {
+	currentMonth = 12;
+	currentYear--;
+  }
+  renderCalendar();
+  renderDayEntries();
+});
+
+document.getElementById("calNextBtn").addEventListener("click", () => {
+  currentMonth++;
+  if (currentMonth >= 13) {
+	currentMonth = 1;
+	currentYear++;
+  }
+  renderCalendar();
+  renderDayEntries();
+});
+
+	castFilterEl.addEventListener("change", () => {
+	  renderCalendar();
+	  renderDayEntries();
+	});
+	statusFilterEl.addEventListener("change", () => {
+	  renderCalendar();
+	  renderDayEntries();
+	});
+
+	window.addEventListener("DOMContentLoaded", async () => {
+	  const today = new Date();
+	  currentYear  = today.getFullYear();
+	  currentMonth = today.getMonth() + 1;
+	  await loadAllEntries();
+	  renderCalendar();
+	  renderDayEntries();
+	});
+  </script>
+</body>
+</html>

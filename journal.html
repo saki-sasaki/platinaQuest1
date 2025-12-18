@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>店長との交換日記📓</title>
+	<link rel="stylesheet" href="assets/common.css">
+	<link rel="stylesheet" href="assets/journal.css">
+</head>
+
+<body>
+	<div class="app-shell">
+
+		<!-- ヘッダー -->
+		<header class="header-card">
+			<div class="header-title">店長との交換日記</div>
+			<div class="header-sub">「今日どうだった？」をこっそり教えてね🫶</div>
+			<div class="cast-pill">
+				<div class="cast-pill-inner">
+					💌<span id="castName">[なまえ]</span>
+				</div>
+			</div>
+		</header>
+
+		<!-- 新規エントリー -->
+		<section class="card">
+			<div class="card-title">今日のきもち</div>
+			<div class="mood-row" id="moodRow">
+				<button type="button" class="mood-btn" data-mood="😊">😊 たのしい</button>
+				<button type="button" class="mood-btn" data-mood="😐">😐 ふつう</button>
+				<button type="button" class="mood-btn" data-mood="😭">😭 しんどい</button>
+				<button type="button" class="mood-btn" data-mood="🔥">🔥 がんばりたい</button>
+				<button type="button" class="mood-btn" data-mood="🥹">🥹 きいてほしい</button>
+			</div>
+			<textarea id="entryText" placeholder="きょうの出勤であったこと・うれしかったこと・モヤっとしたことなど、なんでも書いてOKだよ🐾"></textarea>
+				<div class="send-row">
+					<button class="btn-send" id="sendBtn">店長に送る📨</button>
+				</div>
+		</section>
+
+		<!-- エントリー一覧 -->
+
+		<div class="list-title">これまでの日記</div>
+		<div id="entryList"></div>
+		<div class="footer-nav">
+			<a class="back-link" id="backLink" href="#">← 進捗ページにもどる</a>
+		</div>
+	</div>
+
+	<script>
+		// ★ここをスーパーAPIのURLに置き換え
+		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+
+		const params = new URLSearchParams(location.search);
+		const cast   = params.get("cast") || "";
+
+		if (!cast) {
+				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
+			}
+
+		// 戻るリンク
+		const back = document.getElementById("backLink");
+		if (cast) {
+			back.setAttribute("href", "view.html?cast=" + encodeURIComponent(cast));
+		} else {
+			back.setAttribute("href", "view.html");
+		}
+
+		function castDisplayName(id){
+  if (id === "saki")  return "さきちゃん";
+  if (id === "kaede") return "かえでちゃん";
+  if (id === "mea")   return "めあちゃん";
+  if (id === "oto")   return "おとちゃん";
+  if (id === "maru")  return "まるちゃん";
+  return id || "なまえ未設定";
+}
+
+		// ヘッダーの名前（とりあえず cast をそのまま表示、必要なら displayName連携もあとで）
+		document.getElementById("castName").textContent =
+  castDisplayName(cast) + " の日記";
+
+
+		// mood ボタン
+		let currentMood = "";
+		const moodRow = document.getElementById("moodRow");
+		moodRow.addEventListener("click", (e) => {
+			const btn = e.target.closest(".mood-btn");
+			if (!btn) return;
+			currentMood = btn.dataset.mood || "";
+			// 見た目切り替え
+			document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("active"));
+			btn.classList.add("active");
+		});
+
+		// 日記送信
+		document.getElementById("sendBtn").addEventListener("click", async () => {
+			const text = document.getElementById("entryText").value.trim();
+			if (!text) {
+				alert("なんかひとこと書いてから送ってね！");
+				return;
+			}
+
+			try {
+				const res = await fetch(API_URL + "?mode=journal_add", {
+					method: "POST",
+					// ← headers なし！
+					body: JSON.stringify({
+						cast: cast,
+						mood: currentMood,
+						text: text
+					})
+				});
+
+				const json = await res.json();
+				console.log("journal_add result:", json);
+				if (json.status === "ok") {
+					document.getElementById("entryText").value = "";
+					document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("active"));
+					currentMood = "";
+					await loadEntries();
+					alert("送信したよ！店長があとで読むね📖");
+				} else {
+					alert("送信に失敗しちゃった…店長にスクショ送って！(´;ω;｀)");
+					console.error(json);
+				}
+			} catch (err) {
+				console.error(err);
+				alert("通信エラーで送れませんでした…電波とか確認してみて！");
+			}
+		});
+
+		// 日記一覧読み込み
+		async function loadEntries() {
+			const listEl = document.getElementById("entryList");
+			listEl.innerHTML = "読み込み中…";
+
+			try {
+				const res = await fetch(API_URL + "?mode=journal_list&cast=" + encodeURIComponent(cast));
+				const json = await res.json();
+				console.log("journal_list:", json);
+
+				if (json.status !== "ok") {
+					listEl.innerHTML = "<div class='entry-empty'>読み込みに失敗しました…</div>";
+					return;
+				}
+
+				const list = json.data || [];
+				if (!list.length) {
+					listEl.innerHTML = "<div class='entry-empty'>まだ日記はありません。まずは1通めを書いてみよっか📓</div>";
+					return;
+				}
+
+				listEl.innerHTML = "";
+
+				// 1) 月ごとにまとめる（yyyy-MM）
+				const groups = {};
+				list.forEach(item => {
+					const d = item.entryDate || item.createdAt || "";
+					const ym = (d && d.length >= 7) ? d.slice(0,7) : "不明";
+					if (!groups[ym]) groups[ym] = [];
+					groups[ym].push(item);
+				});
+				// 2) 月の並び順（新しい月が上）
+				const months = Object.keys(groups).sort((a,b) => b.localeCompare(a, "ja"));
+
+				// 3) 描画
+				months.forEach((ym, idx) => {
+					const wrap = document.createElement("div");
+					wrap.className = "month-group";
+
+					// 最初の月だけ開いとく（好みで）
+					if (idx === 0) wrap.classList.add("open");
+
+					const monthLabel = (ym === "不明")
+						? "日付不明"
+						: `${ym.slice(0,4)}年${ym.slice(5,7)}月`;
+
+					const header = document.createElement("div");
+					header.className = "month-header";
+					header.innerHTML = `
+						<div>${monthLabel}</div>
+						<div class="month-meta">${groups[ym].length}件 <span class="month-chevron">▼</span></div>
+					`;
+
+					const body = document.createElement("div");
+					body.className = "month-body";
+
+					// 月の中身（日記カード）を今の作り方で入れる
+					groups[ym].forEach(item => {
+						const div = document.createElement("div");
+						div.className = "entry-item";
+
+						const dateText = item.entryDate || item.createdAt || "";
+						const moodText = item.mood || "";
+
+						const h = document.createElement("div");
+						h.className = "entry-header";
+						h.innerHTML = `
+							<div class="entry-date">${dateText}</div>
+							<div class="entry-mood">${moodText}</div>
+						`;
+
+						const text = document.createElement("div");
+						text.className = "entry-text";
+						text.textContent = item.text || "";
+
+						div.appendChild(h);
+						div.appendChild(text);
+
+						if (item.reply) {
+							const label = document.createElement("div");
+							label.className = "entry-reply-label";
+							label.textContent = "店長からのひとこと";
+
+							const reply = document.createElement("div");
+							reply.className = "entry-reply";
+							reply.textContent = item.reply;
+
+							div.appendChild(label);
+							div.appendChild(reply);
+						}
+
+						const status = document.createElement("div");
+						status.className = "entry-status";
+						if (item.status === "replied" && item.replyAt) {
+							status.textContent = "✅ 店長が読んでくれたよ（" + item.replyAt + "）";
+						} else {
+							status.textContent = "⏳ 店長が読むのを待ってるよ…";
+						}
+						div.appendChild(status);
+						body.appendChild(div);
+					});
+
+					// 4) クリックで開閉
+					header.addEventListener("click", () => {
+						wrap.classList.toggle("open");
+					});
+
+					wrap.appendChild(header);
+					wrap.appendChild(body);
+					listEl.appendChild(wrap);
+				});
+
+			} catch (err) {
+				console.error(err);
+				listEl.innerHTML = "<div class='entry-empty'>読み込みに失敗しました…</div>";
+			}
+		}
+
+		// 起動
+		window.addEventListener("DOMContentLoaded", () => {
+			if (cast) {
+				loadEntries();
+			}
+		});
+	</script>
+</body>
+</html>

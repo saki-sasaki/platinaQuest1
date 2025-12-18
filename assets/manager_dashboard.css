@@ -1,0 +1,495 @@
+		/* 右側：キャスト切り替え */
+		.header-right-top {
+			display: flex;
+			flex-direction: column;
+			gap: 0.4rem;
+			min-width: 0;
+			flex-basis: 100%;   /* これで強制改行！ */
+		}
+
+		.cast-switcher {
+			background: #fff;
+			color: var(--choco);
+			font-weight: 600;
+			font-size: 0.75rem;
+			border-radius: 8px;
+			border: 1px solid rgba(255,102,170,0.3);
+			box-shadow: 0 2px 6px rgba(0,0,0,.08);
+
+			padding: 0.15rem 0.45rem;
+			height: 1.8rem;
+
+			display: flex;
+			align-items: center;
+			gap: 0.35rem;
+			white-space: nowrap;
+			width: fit-content;
+		}
+
+		.cast-switcher label {
+			font-size: 0.7rem;
+			font-weight: 700;
+			color: #aa6688;
+			line-height: 1;
+			white-space: nowrap;
+		}
+
+		.cast-switcher select {
+			border: none;
+			background: transparent;
+			font-size: 0.8rem;
+			font-weight: 700;
+			color: var(--choco);
+			outline: none;
+			padding: 0;
+			height: 1.2rem;
+			line-height: 1.2rem;
+			width: 5rem;
+			white-space: nowrap;
+		}
+
+		.admin-controls{
+			display:flex;
+			align-items:center;
+			justify-content:center; /* 左寄せなら flex-start */
+			gap:.7rem;
+			margin:.75rem 0 1rem;
+			flex-wrap:wrap;
+		}
+
+		/* 左：キャスト選択 */
+		.cast-select-wrap{
+			display:inline-flex;
+			align-items:center;
+			gap:.5rem;
+			padding:.5rem .75rem;
+			border-radius:999px;
+			border:2px solid var(--line);
+			background:#fff;
+			box-shadow:0 8px 16px rgba(255,102,170,.14);
+			height:40px;              /* ★リンクと高さ揃える */
+			box-sizing:border-box;
+		}
+
+		.ctl-label{
+			font-weight:900;
+			font-size:.78rem;
+			color:var(--pink);
+			white-space:nowrap;
+		}
+
+		#castSelect{
+			border:none;
+			outline:none;
+			background:transparent;
+			font-weight:900;
+			color:var(--choco);
+			cursor:pointer;
+			height:100%;
+		}
+
+		/* 右：交換日記リンク（ボタン化） */
+		#journalLink{
+			display:inline-flex;
+			align-items:center;
+			justify-content:center;
+			height:40px;              /* ★プルと高さ揃える */
+			padding:0 .95rem;
+			border-radius:999px;
+			background:linear-gradient(135deg,#66ccff 0%,#3399ff 100%);
+			color:var(--bg);
+			font-weight:900;
+			text-decoration:none;
+			box-shadow:0 8px 16px rgba(102,204,255,.3);
+			box-sizing:border-box;
+			white-space:nowrap;
+		}
+
+		#journalLink:hover{ filter:brightness(1.03); }
+		#journalLink:active{ transform:translateY(1px); }
+
+		/* 1段目：左＝タイトル＋ピル / 右＝キャスト切替 */
+		.header-row1 {
+
+			justify-content: space-between;
+			align-items: center;
+			gap: 0.75rem;
+		}
+
+		/* 左側ブロック（ピル） */
+		.header-left {
+			display: flex;
+			flex-direction: column;
+			gap: 0.4rem;
+			min-width: 0;
+			/* これで横方向の中央寄せになる！ */
+			align-items: center;
+			text-align: center; /* テキストも中央 */
+		}
+
+		/* キャスト名ピル */
+		.cast-pill {
+			font-weight:800;
+			font-size:1.1rem;
+			display:flex;
+			justify-content:center;
+			align-items:center;
+			gap:.5rem;
+			flex-wrap:wrap;
+			margin-top: 1rem;
+		}
+
+		.{
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			background: #fff;
+			color: var(--pink);
+			font-weight: 800;
+			font-size: 0.9rem;
+			padding: 0.45rem 1.1rem;
+			border-radius: 999px;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+			width: fit-content;
+		}
+
+		/* 2段目：出勤サマリー（センター） */
+		.header-row2 {
+			margin-top: 0.6rem;
+			text-align: center;
+		}
+
+		/* 出勤サマリーロゴ風 */
+		.header-row2-main {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+
+			padding: 0.6rem 1.2rem;
+			border-radius: 999px;
+
+			background: var(--bg);
+			border:2px solid var(--line);
+			font-size: 1.1rem;
+			font-weight: 800;
+			color: #ff4f9d;
+
+			letter-spacing: 0.03em;
+
+			position: relative;
+		}
+
+		/* キラキラ演出（左右） */
+		.header-row2-main::before,
+		.header-row2-main::after {
+			content: "✨";
+			position: absolute;
+			top: -0.3rem;
+			font-size: 0.9rem;
+			opacity: 0.9;
+		}
+
+		.header-row2-main::before {
+			left: -0.6rem;
+		}
+
+		.header-row2-main::after {
+			right: -0.6rem;
+		}
+
+		/* 3段目：スタート＋達成バッジ（センター） */
+		.header-row3 {
+			margin-top: 0.6rem;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.8rem;
+			margin-bottom: 1rem;
+		}
+
+		.header-start {
+			color: #fff;
+			font-weight: 600;
+		}
+
+		/* 達成バッジ */
+		.summary-badge {
+			border-radius: 999px;
+			padding: 0.15rem 0.6rem;
+			font-size: 0.75rem;
+			font-weight: 800;
+			color: var(--bg);
+			display: inline-flex;
+			align-items: center;
+			gap: 0.25rem;
+		}
+		.summary-badge::before {
+			content: "⭐";
+			font-size: 0.85rem;
+		}
+
+		/* スマホで潰れないように少し調整 */
+		@media (max-width: 480px) {
+			.header-row1 {
+				gap: 0.5rem;
+			}
+			.cast-switcher select {
+				width: 4.5rem;
+			}
+		}
+
+
+		/* =========================================
+			プレビュー
+		========================================= */
+		.pv-section {
+			background: #fff7fb;
+			border: 2px solid #ffd4ec;
+			border-radius: 14px;
+			padding: 0.8rem 1rem;
+			margin-top: 1rem;
+			box-shadow: 0 3px 6px rgba(255,102,170,.12);
+		}
+
+		.pv-title {
+			font-size: 0.9rem;
+			font-weight: 800;
+			color: #ff66aa;
+			margin-bottom: 0.4rem;
+		}
+
+		.pv-list {
+			margin: 0;
+			padding-left: 0.2rem;
+			list-style: none;
+			font-size: 0.8rem;
+		}
+
+		.pv-list li {
+			margin-bottom: 0.25rem;
+			line-height: 1.4;
+		}
+
+		.pv-val {
+			font-weight: 800;
+			color: #ff66aa;
+		}
+
+		/* =========================================
+			編集フォーム
+		========================================= */
+		.edit-card {
+			background: #fff;
+			border-radius: var(--radius-lg);
+			border: 2px solid var(--line);
+			box-shadow: 0 6px 12px rgba(255,102,170,0.15);
+			padding: 1rem;
+			margin-top: 1rem;
+		}
+
+		.edit-title {
+			font-size: 1rem;
+			font-weight: 700;
+			color: var(--pink);
+			margin-bottom: 0.5rem;
+			display: flex;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+
+		.edit-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: flex-end;
+			gap: 0.6rem 1rem;
+			margin-bottom: 0.75rem;
+		}
+
+		.edit-row label {
+			font-weight: 700;
+			color: var(--choco);
+			font-size: 0.8rem;
+			display: block;
+		}
+
+		.edit-row small {
+			font-size: 0.7rem;
+			font-weight: 500;
+			color: #a07799;
+			display: block;
+			line-height: 1.3;
+		}
+
+		/* =========================================
+			項目とラベル（高さ崩れ防止）
+		========================================= */
+		.quest-item,
+		.edit-item {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			min-width: 90px; /* ←スマホに最適化 */
+		}
+
+		.quest-item label,
+		.edit-item label {
+			font-weight: 700;
+			color: var(--choco);
+			font-size: 0.75rem;
+			min-height: 2.0em; /* ←ラベル2行でも揃う */
+			line-height: 1.2;
+			word-break: break-word;
+		}
+
+		.section-title {
+			font-size: 0.9rem;
+			font-weight: 800;
+			color: var(--pink);
+			margin-bottom: 0.3rem;
+  			flex-basis: 100%;   /* これで強制改行！ */
+		}
+
+		.basic-item {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			min-width: 85%;
+		}
+
+		/* input の見た目を統一する */
+		.basic-item input[type="number"],
+		.basic-item input[type="date"],
+		.basic-item input[type="text"] {
+			width: 100%;
+			border-radius: 8px;
+			border: 2px solid var(--pink);
+			padding: .35rem .5rem;
+			font-size: .85rem;
+			font-weight: 700;
+			color: var(--choco);
+			background: #fff;
+			box-shadow: 0 4px 8px rgba(0,0,0,.12);
+			outline: none;
+			box-sizing: border-box;
+		}
+
+		/* フォーカス時のキラッとした演出 */
+		.basic-item input:focus {
+			border-color: var(--blue);
+			box-shadow: 0 0 0 3px rgba(102,204,255,0.25);
+		}
+
+
+		/* =========================================
+			トグル & ピル入力（高さそろえる）
+		========================================= */
+		.toggle-flag,
+		.pill-input {
+			width: 90px;
+			min-height: 2.2rem;   /* ←高さ固定＆揃う */
+			box-sizing: border-box;
+		}
+
+		/* トグル */
+		.toggle-flag {
+			border-radius: 8px;
+			border: 2px solid var(--pink);
+			font-size: 0.75rem;
+			font-weight: 700;
+			padding: 0;      /* ←上下のズレ防止 */
+			background: #fff;
+			color: var(--pink);
+			box-shadow: 0 4px 8px rgba(0,0,0,.15);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
+		.toggle-flag.done {
+			background: var(--pink);
+			color: #fff;
+		}
+
+
+		/* ハート用：数字入力をトグルっぽいピルにする */
+		.pill-input {
+			border-radius: 8px;
+			border: 2px solid var(--pink);
+			background: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 4px 8px rgba(0,0,0,.12);
+		}
+
+		.pill-input input[type="number"] {
+			border: none;
+			width: 2.2rem;
+			padding: 0;
+			text-align: right;
+			font-size: 0.8rem;
+			font-weight: 700;
+			color: var(--choco);
+			outline: none;
+			background: transparent;
+		}
+
+		.pill-input span {
+			font-size: 0.65rem;
+			font-weight: 700;
+			color: var(--pink);
+			margin-left: 0.15rem;
+		}
+
+		/* =========================================
+			3列レイアウト
+		========================================= */
+
+		.triple-grid {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 0.5rem 0.6rem;
+			margin-bottom: 1rem;
+		}
+
+
+		/* =========================================
+			etc.
+		========================================= */
+		.btn-apply {
+			background: var(--blue);
+			border: 2px solid #fff;
+			color: #fff;
+			font-size: .9rem;
+			font-weight: 700;
+			border-radius: var(--radius-md);
+			padding: .6rem 1rem;
+			box-shadow: 0 6px 12px rgba(102,204,255,.4);
+			cursor: pointer;
+		}
+
+		hr {
+			border: 0;
+			border-top: 2px dashed var(--line);
+			margin: 1rem 0;
+		}
+
+		.hint-box {
+			font-size: .7rem;
+			font-weight: 500;
+			color: #a07799;
+			line-height: 1.4;
+			margin-top: 2rem;
+			text-align: center;
+		}
+
+		/* =========================================
+			スマホ最適化
+		========================================= */
+		@media (max-width: 480px) {
+			.triple-grid {
+				grid-template-columns: repeat(3, 1fr); /* スマホでも3列維持 */
+			}
+		}
