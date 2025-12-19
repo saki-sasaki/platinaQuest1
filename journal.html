@@ -67,12 +67,19 @@
 			back.setAttribute("href", "view.html");
 		}
 
-		// 例：journal_list や progress API のレスポンスを受け取ったあと
-const nameToShow =
-  item.castDisplay || item.displayName || item.cast || "[なまえ未設定]";
+		function castDisplayName(id){
+  if (id === "saki")  return "さきちゃん";
+  if (id === "kaede") return "かえでちゃん";
+  if (id === "mea")   return "めあちゃん";
+  if (id === "oto")   return "おとちゃん";
+  if (id === "maru")  return "まるちゃん";
+  return id || "なまえ未設定";
+}
 
-document.getElementById("castName").textContent =
-  nameToShow + " の日記";
+		// ヘッダーの名前（とりあえず cast をそのまま表示、必要なら displayName連携もあとで）
+		document.getElementById("castName").textContent =
+  castDisplayName(cast) + " の日記";
+
 
 		// mood ボタン
 		let currentMood = "";
