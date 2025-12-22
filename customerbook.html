@@ -236,25 +236,28 @@
 		const params = new URLSearchParams(window.location.search);
 		const cast = params.get("cast"); // 例: "saki", "maru", "kaede"...
 
-		// cast を表示用の名前（ひらがな＋ちゃん）に変換
-		function castDisplayName(id){
-			if (id === "saki")  return "さきちゃん";
-			if (id === "kaede") return "かえでちゃん";
-			if (id === "mea")   return "めあちゃん";
-			if (id === "oto")   return "おとちゃん";
-			if (id === "maru")  return "まるちゃん";
-			return id || "なまえ未設定";
+		// ✅ progress から displayName を取ってくる
+		async function fetchCastDisplayName(castId) {
+			if (!castId) return "なまえ未設定";
+			try {
+				const res  = await fetch(API_URL + "?mode=progress&cast=" + encodeURIComponent(castId));
+				const json = await res.json();
+				if (json && json.status === "ok" && json.data) {
+					return json.data.displayName || json.data.name || castId;
+				}
+			} catch (e) {
+				console.warn("fetchCastDisplayName failed:", e);
+			}
+			return castId;
 		}
-
-		// ヘッダーの「●●ちゃんのページ💟（店長は見れないよ）」 ※文言は好みで変えてOK
-			document.getElementById("castName").textContent =
-  castDisplayName(cast) + " のページ";
 
 		// 現在の編集対象 index。-1なら新規
 		let editingIndex = -1;
 
 		// 全お客さんデータ（customerAPI.gs のオブジェクトそのまま）
 		let customers = [];
+
+		let castDisplay = ""; // ✅ progressから取った表示名を入れる
 
 		// ★検索キーワード（空なら全件表示）
 		let searchKeyword = "";
@@ -364,63 +367,61 @@
 		// ========= API 呼び出し =========
 
 		// ★今の「検索キーワード」と「並び順」で並べた結果を index の配列で返す
-function buildViewIndices() {
-  const kw = (searchKeyword || "").trim().toLowerCase();
+		function buildViewIndices() {
+			const kw = (searchKeyword || "").trim().toLowerCase();
 
-  const sortSelect = document.getElementById("sortMode");
-  const mode = sortSelect ? sortSelect.value : "rank";
+			const sortSelect = document.getElementById("sortMode");
+			const mode = sortSelect ? sortSelect.value : "rank";
 
-  // [0,1,2,...] みたいな元配列の index のリスト
-  const indices = customers.map((_, idx) => idx);
+			// [0,1,2,...] みたいな元配列の index のリスト
+			const indices = customers.map((_, idx) => idx);
 
-  // 検索フィルタ
-  const filtered = indices.filter(i => {
-    if (!kw) return true;
-    const c = customers[i];
-    const text =
-      ((c.customerName || "") + " " + (c.memo || "")).toLowerCase();
-    return text.includes(kw);
-  });
+			// 検索フィルタ
+			const filtered = indices.filter(i => {
+				if (!kw) return true;
+				const c = customers[i];
+				const text =
+				((c.customerName || "") + " " + (c.memo || "")).toLowerCase();
+				return text.includes(kw);
+			});
 
-  // 日付を安全に Date にするヘルパー
-  function toDateSafe(v) {
-    if (!v) return new Date("1970-01-01");
-    const d = new Date(v);
-    return isNaN(d.getTime()) ? new Date("1970-01-01") : d;
-  }
+			// 日付を安全に Date にするヘルパー
+			function toDateSafe(v) {
+				if (!v) return new Date("1970-01-01");
+				const d = new Date(v);
+				return isNaN(d.getTime()) ? new Date("1970-01-01") : d;
+			}
 
-  // 並び替え
-  if (mode === "rank") {
-    // 推されランク → 最終来店
-    filtered.sort((ia, ib) => {
-      const a = customers[ia];
-      const b = customers[ib];
-      const ra = Number(a.heartRank || 0);
-      const rb = Number(b.heartRank || 0);
-      if (ra !== rb) return rb - ra;
-
-      const da = toDateSafe(a.lastVisit);
-      const db = toDateSafe(b.lastVisit);
-      return db - da;
-    });
-  } else if (mode === "last") {
-    // 最終来店が新しい順
-    filtered.sort((ia, ib) => {
-      const da = toDateSafe(customers[ia].lastVisit);
-      const db = toDateSafe(customers[ib].lastVisit);
-      return db - da;
-    });
-  } else if (mode === "name") {
-    // 名前順
-    filtered.sort((ia, ib) => {
-      const na = (customers[ia].customerName || "").toString();
-      const nb = (customers[ib].customerName || "").toString();
-      return na.localeCompare(nb, "ja");
-    });
-  }
-
-  return filtered;
-}
+			// 並び替え
+			if (mode === "rank") {
+				// 推されランク → 最終来店
+				filtered.sort((ia, ib) => {
+					const a = customers[ia];
+					const b = customers[ib];
+					const ra = Number(a.heartRank || 0);
+					const rb = Number(b.heartRank || 0);
+					if (ra !== rb) return rb - ra;
+					const da = toDateSafe(a.lastVisit);
+					const db = toDateSafe(b.lastVisit);
+					return db - da;
+				});
+			} else if (mode === "last") {
+				// 最終来店が新しい順
+				filtered.sort((ia, ib) => {
+					const da = toDateSafe(customers[ia].lastVisit);
+					const db = toDateSafe(customers[ib].lastVisit);
+					return db - da;
+				});
+			} else if (mode === "name") {
+				// 名前順
+				filtered.sort((ia, ib) => {
+					const na = (customers[ia].customerName || "").toString();
+					const nb = (customers[ib].customerName || "").toString();
+					return na.localeCompare(nb, "ja");
+				});
+			}
+			return filtered;
+		}
 
 		// 一覧取得（castごと）
 		async function fetchCustomerList() {
@@ -749,49 +750,6 @@ function buildViewIndices() {
 			}
 		}
 
-
-		// 日付をタップしたとき：その日の来店メンバーを「ここに出るよ📅」に表示
-		async function onCalendarDayClick(dateStr) {
-			const infoBox = document.getElementById("calendarDayInfo");
-			if (!infoBox) return;
-
-			infoBox.textContent = "読み込み中…";
-
-			try {
-				const url = `${API_URL}?mode=visitdetail`
-					+ `&cast=${encodeURIComponent(cast || "")}`
-					+ `&date=${encodeURIComponent(dateStr)}`;
-
-				const res = await fetch(url);
-				const json = await res.json();
-
-				if (json.status !== "ok") {
-					console.error("visitdetail error:", json);
-					infoBox.textContent = "読み込みに失敗しました…";
-					return;
-				}
-
-				const list = json.data || [];
-
-				if (list.length === 0) {
-					infoBox.textContent = `${dateStr} の来店ログはありません`;
-					return;
-				}
-
-				const names = list.map(v => v.customerName || "(名前なし)");
-
-				infoBox.textContent = `${dateStr} の来店メンバー：` + names.join("、");
-
-				// ★もしここで「編集ポップアップ」も開きたいなら、
-				//   ここから自分の openVisitPopup(dateStr, list) みたいな関数を呼べばOK
-				// openVisitPopup(dateStr, list);
-
-			} catch (err) {
-				console.error("visitdetail fetch error:", err);
-				infoBox.textContent = "通信エラーで読み込めませんでした…";
-			}
-		}
-
 		// 名前を安全に表示する用（< > とかをエスケープ）
 		function esc(str) {
 			if (str == null) return "";
@@ -816,54 +774,54 @@ function buildViewIndices() {
 
 				const list = res.data || [];
 				let html = `
-  <div class="visit-detail-card">
-    <div class="visit-detail-header">
-      <div class="visit-detail-title">📅 ${esc(dateStr)} の来店ログ</div>
-      <div class="visit-detail-caption">
-        この日に来てくれたお客さんリストだよ🪄
-      </div>
-    </div>
-`;
+					<div class="visit-detail-card">
+						<div class="visit-detail-header">
+							<div class="visit-detail-title">📅 ${esc(dateStr)} の来店ログ</div>
+							<div class="visit-detail-caption">
+								この日に来てくれたお客さんリストだよ🪄
+							</div>
+						</div>
+					</div>
+				`;
 
-if (list.length === 0) {
-  html += `
-    <div class="visit-detail-empty">
-      まだ来店ログがないみたい…🥹<br>
-      「今日の来店ログ」から登録してみてね。
-    </div>
-  `;
-} else {
-  html += `<div class="visit-detail-list">`;
+				if (list.length === 0) {
+					html += `
+						<div class="visit-detail-empty">
+							まだ来店ログがないみたい…🥹<br>
+							「今日の来店ログ」から登録してみてね。
+						</div>
+					`;
+				} else {
+					html += `<div class="visit-detail-list">`;
 
-  list.forEach(item => {
-    const name = item.customerName || "(ななしさん)";
-html += `
-  <div class="visit-detail-item">
-    <div class="visit-detail-main">
-      <span class="visit-detail-icon">🍸</span>
+					list.forEach(item => {
+						const name = item.customerName || "(ななしさん)";
+						html += `
+							<div class="visit-detail-item">
+								<div class="visit-detail-main">
+									<span class="visit-detail-icon">🍸</span>
 
-      <button class="visit-detail-name-btn"
-  onclick="openCustomerFromVisit('${item.customerId}')">
-  ${esc(name)}
-</button>
+									<button class="visit-detail-name-btn"
+									onclick="openCustomerFromVisit('${item.customerId}')">
+										${esc(name)}
+									</button>
+								</div>
 
-    </div>
+								<div class="visit-detail-actions">
+									<button class="visit-btn visit-btn-edit"
+									onclick="editVisit('${item.customerId}','${dateStr}')">編集✏️</button>
+									<button class="visit-btn visit-btn-delete"
+									onclick="deleteVisit('${item.customerId}','${dateStr}')">削除🗑</button>
+								</div>
+							</div>
+						`;
 
-    <div class="visit-detail-actions">
-      <button class="visit-btn visit-btn-edit"
-        onclick="editVisit('${item.customerId}','${dateStr}')">編集✏️</button>
-      <button class="visit-btn visit-btn-delete"
-        onclick="deleteVisit('${item.customerId}','${dateStr}')">削除🗑</button>
-    </div>
-  </div>
-`;
+					});
 
-  });
+					html += `</div>`; // visit-detail-list
+				}
 
-  html += `</div>`; // visit-detail-list
-}
-
-html += `</div>`; // ★ visit-detail-card を最後に閉じる
+				html += `</div>`; // ★ visit-detail-card を最後に閉じる
 
 
 				const box = document.getElementById("visitDetailBox");
@@ -1152,7 +1110,7 @@ html += `</div>`; // ★ visit-detail-card を最後に閉じる
 			const obj = base ? { ...base } : {};
 
 			obj.cast         = cast || "";
-			obj.castDisplay  = castDisplayName(cast);
+			obj.castDisplay = castDisplay || cast || "";
 			obj.customerName = document.getElementById("f_display_name").value.trim();
 			obj.heartRank    = tempOsareLevel;
 			obj.exchangeContact = document.getElementById("f_has_contact").checked;
@@ -1386,6 +1344,11 @@ function openCustomerFromVisit(customerId) {
 			if (!cast) {
 				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
 			}
+
+			// ✅ ヘッダー表示名を progress.displayName にする
+			castDisplay = await fetchCastDisplayName(cast);
+			const castNameEl = document.getElementById("castName");
+			if (castNameEl) castNameEl.textContent = castDisplay + " のページ";
 
 			initStaticUI();
 			setupOsarePicker();
