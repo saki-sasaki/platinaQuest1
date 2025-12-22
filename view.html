@@ -41,6 +41,10 @@
 			</div>
 		</header>
 
+		<button id="shiftBtn" class="primary-btn">
+			💖 出勤した 💖
+		</button>
+
 		<!-- メインクエスト -->
 		<section class="section-card">
 			<div class="section-title">
@@ -232,159 +236,188 @@
 		</div>
 
 
-	<script>
-		const params = new URLSearchParams(location.search);
-		const cast = params.get('cast') || "";
-		const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
+		<script>
+			const params = new URLSearchParams(location.search);
+			const cast = params.get("cast") || "";
+			const API_URL = "https://script.google.com/macros/s/AKfycbwZy842pl9a5bsSFH1trXhW7-hIByswRWAguxwgeCsf-8Ujw2MRFJ7N7cypExhmehlR/exec";
 
-		if (!cast) {
+			if (!cast) {
 				alert("このページには ?cast=◯◯ を付けてアクセスしてね！（例: .html?cast=saki）");
 			}
-		
-		// ▼ プロフ帳リンク（お客さんプロフ帳カード）
-		const customerBookLink = document.getElementById("customerBookLink");
-		if (customerBookLink) {
-			if (cast) {
-				// キャスト付きでプロフ帳へ
+
+			// ▼ プロフ帳リンク
+			// const customerBookLink = document.getElementById("customerBookLink");
+			if (customerBookLink) {
 				customerBookLink.setAttribute(
 					"href",
-					"customerbook.html?cast=" + encodeURIComponent(cast)
+					cast ? "customerbook.html?cast=" + encodeURIComponent(cast) : "customerbook.html"
 				);
-			} else {
-				// 念のため、cast がないときは共通ページに飛ばす
-				customerBookLink.setAttribute("href", "customerbook.html");
 			}
-		}
 
-		// ▼ 店長交換日記
-		const journalLink = document.getElementById("journalLink");
-		if (journalLink) {
-			if (cast) {
-				// キャスト付きで交換日記へ
+			// ▼ 交換日記リンク
+			const journalLink = document.getElementById("journalLink");
+			if (journalLink) {
 				journalLink.setAttribute(
 					"href",
-					"journal.html?cast=" + encodeURIComponent(cast)
+					cast ? "journal.html?cast=" + encodeURIComponent(cast) : "journal.html"
 				);
-			} else {
-				// 念のため、cast がないときは共通ページに飛ばす
-				journalLink.setAttribute("href", "journal.html");
-			}
-		}
-
-		// 💗ハート
-		function heartProgress(idPrefix, current, max) {
-			const cur = Number(current) || 0;
-
-			let hearts = "";
-			for (let i = 1; i <= max; i++) {
-				hearts += i <= cur ? "💗" : "🤍";
 			}
 
-			const iconsEl = document.getElementById(`${idPrefix}_icons`);
-			const numEl   = document.getElementById(`${idPrefix}_num`);
+			// 💗ハート
+			function heartProgress(idPrefix, current, max) {
+				const cur = Number(current) || 0;
 
-			if (iconsEl) iconsEl.textContent = hearts;
-			if (numEl)   numEl.textContent   = cur;
-		}
+				let hearts = "";
+				for (let i = 1; i <= max; i++) {
+					hearts += i <= cur ? "💗" : "🤍";
+				}
 
-		// 💗ハートバー
-		function heartBar(countId, barId, current, max){
-			const cur = Math.max(0, Number(current) || 0);
-			const m = Math.max(1, Number(max) || 1);
-			const pct = Math.min(cur / m, 1) * 100;
-
-			const numEl = document.getElementById(countId);
-			const barEl = document.getElementById(barId);
-
-			if (numEl) {
-				numEl.textContent = cur;
+				const iconsEl = document.getElementById(`${idPrefix}_icons`);
+				const numEl = document.getElementById(`${idPrefix}_num`);
+				if (iconsEl) iconsEl.textContent = hearts;
+				if (numEl) numEl.textContent = cur;
 			}
 
-			if (barEl){
-				// レイアウト確定後に幅を入れるとアニメも確実に効く
-				requestAnimationFrame(()=>{ barEl.style.width = pct + "%"; });
+			// 💗バー
+			function heartBar(countId, barId, current, max) {
+				const cur = Math.max(0, Number(current) || 0);
+				const m = Math.max(1, Number(max) || 1);
+				const pct = Math.min(cur / m, 1) * 100;
+
+				const numEl = document.getElementById(countId);
+				const barEl = document.getElementById(barId);
+
+				if (numEl) numEl.textContent = cur;
+				if (barEl) requestAnimationFrame(() => { barEl.style.width = pct + "%"; });
 			}
 
-			// デバッグ（必要なら見てね）
-			console.log("heartBar", {countId, barId, cur, m, pct, numEl: !!numEl, barEl: !!barEl});
-		}
+			// 達成/未達成
+			function setStatus(id, done) {
+				const el = document.getElementById(id);
+				if (!el) return;
 
+				el.classList.remove("done", "notyet");
+				el.classList.add("status-badge");
 
-		// 達成/未達成
-		function setStatus(id, done) {
-			const el = document.getElementById(id);
-			if (!el) return;
-
-			// 一旦リセット
-			el.classList.remove("done", "notyet");
-			el.classList.add("status-badge");
-
-			if (done) {
-				el.textContent = "クリア";
-				el.classList.add("done");
-			} else {
-				el.textContent = "未";
-				el.classList.add("notyet");
-			}
-		}
-
-		fetch(`${API_URL}?cast=${encodeURIComponent(cast)}`)
-		.then(r => r.json())
-		.then(json => {
-			console.log("API response:", json);
-
-			// ★ status/data 形式でも、昔の「素のオブジェクト」でも両対応
-			const data = json.data || json;
-			if (!data) {
-				console.warn("データが空だよ cast:", cast);
-				return;
+				if (done) {
+					el.textContent = "クリア";
+					el.classList.add("done");
+				} else {
+					el.textContent = "未";
+					el.classList.add("notyet");
+				}
 			}
 
-			// ===== ヘッダー反映 =====
-			const nameToShow = data.displayName || data.name || "[なまえ]";
-			document.getElementById("castName").textContent =
-			nameToShow + "の進捗状況";
+			// ===== progress読み込み（これ1本だけを入口にする）=====
+			async function loadProgress() {
+				if (!cast) return;
 
-			document.getElementById("shiftCount").textContent =
-			data.shiftCount || 0;
-			document.getElementById("shiftLeft").textContent =
-			(data.shiftRemaining != null) ? data.shiftRemaining : 0;
-			document.getElementById("startDate").textContent =
-			data.startDate || data.start_date || "----";
+				const res = await fetch(`${API_URL}?mode=progress&cast=${encodeURIComponent(cast)}`);
+				const json = await res.json();
 
-			// ===== 🌟メインクエスト =====
-			heartProgress("q-main-contact-heart", data.mainContact, 5);
-			heartProgress("q-main-call-heart",    data.mainCall,    3);
-			setStatus("q-main-dinner-status", (Number(data.mainDinner) || 0) >= 1);
+				if (json.status !== "ok") {
+					console.error("progress error:", json);
+					alert("進捗の読み込みに失敗しました…");
+					return;
+				}
 
-			// ===== 📱SNS =====
-			setStatus("q-sns-open-status", (Number(data.snsOpen) || 0) >= 1);
-			heartProgress("q-sns-weekpost-heart", data.snsWeekpost, 4);
-			heartBar(
-				"q-sns-daystory-bar_num",
-				"q-sns-daystory-bar",
-				Number(data.snsDaystory) || 0,
-				30
-			);
-			setStatus("q-sns-interact-status",  (Number(data.snsInteract)  || 0) >= 1);
-			setStatus("q-sns-followers-status", (Number(data.snsFollowers) || 0) >= 50);
+				const data = json.data || {};
+				console.log("progress data:", data);
 
-			// ===== 💬コミュニケーション =====
-			heartProgress("q-line-thanks-heart", data.lineThanks, 5);
-			setStatus("q-line-rally-status", (Number(data.lineRally) || 0) >= 1);
-			setStatus("q-talkdeck-status",   (Number(data.talkdeck)  || 0) >= 1);
+				// ヘッダー
+				const nameToShow = data.displayName || data.name || "[なまえ]";
+				const castNameEl = document.getElementById("castName");
+				if (castNameEl) castNameEl.textContent = nameToShow + "の進捗状況";
 
-			// ===== 🪞営業マインド =====
-			heartProgress("q-weekly-ref-heart", data.weeklyReflection, 4);
-			heartBar(
-				"q-customer-profile-bar_num",
-				"q-customer-profile-bar",
-				Number(data.customerProfile) || 0,
-				10
-			);
-		})
-		.catch(err => console.error("fetch error:", err));
+				const shiftCountEl = document.getElementById("shiftCount");
+				const shiftLeftEl  = document.getElementById("shiftLeft");
+				const startDateEl  = document.getElementById("startDate");
 
+				if (shiftCountEl) shiftCountEl.textContent = data.shiftCount || 0;
+				if (shiftLeftEl)  shiftLeftEl.textContent  = (data.shiftRemaining != null) ? data.shiftRemaining : 0;
+				if (startDateEl)  startDateEl.textContent  = data.startDate || "----";
+
+				// メインクエスト
+				heartProgress("q-main-contact-heart", data.mainContact, 5);
+				heartProgress("q-main-call-heart", data.mainCall, 3);
+				setStatus("q-main-dinner-status", (Number(data.mainDinner) || 0) >= 1);
+
+				// SNS
+				setStatus("q-sns-open-status", (Number(data.snsOpen) || 0) >= 1);
+				heartProgress("q-sns-weekpost-heart", data.snsWeekpost, 4);
+				heartBar("q-sns-daystory-bar_num", "q-sns-daystory-bar", Number(data.snsDaystory) || 0, 30);
+				setStatus("q-sns-interact-status", (Number(data.snsInteract) || 0) >= 1);
+				setStatus("q-sns-followers-status", (Number(data.snsFollowers) || 0) >= 50);
+
+				// コミュ
+				heartProgress("q-line-thanks-heart", data.lineThanks, 5);
+				setStatus("q-line-rally-status", (Number(data.lineRally) || 0) >= 1);
+				setStatus("q-talkdeck-status", (Number(data.talkdeck) || 0) >= 1);
+
+				// 営業マインド
+				heartProgress("q-weekly-ref-heart", data.weeklyReflection, 4);
+				heartBar("q-customer-profile-bar_num", "q-customer-profile-bar", Number(data.customerProfile) || 0, 10);
+
+				return data; // 出勤ボタンで使えるように返す
+			}
+
+			// ===== 出勤ボタン =====
+			const shiftBtn = document.getElementById("shiftBtn");
+
+			async function markShift() {
+				if (!cast || !shiftBtn) return;
+
+				shiftBtn.disabled = true;
+				const oldText = shiftBtn.textContent;
+				shiftBtn.textContent = "保存中…";
+				try {
+					// 最新のprogressを取り直す
+					const data = await loadProgress();
+					if (!data) return;
+
+					const newShiftCount = Number(data.shiftCount || 0) + 1;
+					const newRemaining = Math.max(0, Number(data.shiftRemaining || 0) - 1);
+
+					const saveRes = await fetch(`${API_URL}?mode=progress_save`, {
+						method: "POST",
+						body: JSON.stringify({
+							name: cast,
+							shiftCount: newShiftCount,
+							shiftRemaining: newRemaining
+						})
+					});
+					const saveJson = await saveRes.json();
+					if (saveJson.status !== "ok") {
+						console.error("progress_save error:", saveJson);
+						alert("保存に失敗しました…(´;ω;｀)");
+					return;
+					}
+
+					await loadProgress();
+					alert("出勤カウントしたよ✅");
+
+				} catch (err) {
+					console.error(err);
+					alert("通信エラーで出勤カウントできませんでした…");
+				} finally {
+					shiftBtn.disabled = false;
+					shiftBtn.textContent = oldText;
+				}
+			}
+			if (shiftBtn) {
+				shiftBtn.addEventListener("click", () => {
+					if (!confirm("出勤カウントしてOK？（+1）")) return;
+					markShift();
+				});
+			}
+
+			shiftBtn.classList.add("is-success");
+setTimeout(()=>shiftBtn.classList.remove("is-success"), 600);
+
+			// 起動
+			window.addEventListener("DOMContentLoaded", () => {
+				loadProgress();
+			});
 	</script>
 </body>
 </html>

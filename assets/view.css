@@ -129,6 +129,67 @@
 			}
 		}
 
+		/* ===== 出勤ボタン ===== */
+		#shiftBtn {
+			display: block;
+			margin: 0 auto;
+			margin-top: 1rem;
+			appearance: none;
+			border: none;
+			border-radius: 999px;
+			padding: 0.55rem 1rem;
+			font-size: 1rem;
+			font-weight: 600;
+			letter-spacing: 0.03em;
+
+			background: linear-gradient(135deg, #ff9acb, #ff6fae);
+			color: #fff;
+
+			cursor: pointer;
+			box-shadow:
+				0 4px 10px rgba(255, 105, 180, 0.25),
+				inset 0 1px 0 rgba(255,255,255,0.35);
+
+			transition:
+				transform 0.15s ease,
+				box-shadow 0.15s ease,
+				opacity 0.15s ease;
+		}
+
+		/* hover：ちょい浮く */
+		#shiftBtn:hover {
+			transform: translateY(-1px);
+			box-shadow:
+				0 6px 14px rgba(255, 105, 180, 0.35),
+				inset 0 1px 0 rgba(255,255,255,0.4);
+			}
+
+		/* active：押し込み感 */
+		#shiftBtn:active {
+			transform: translateY(1px);
+			box-shadow:
+				0 2px 6px rgba(255, 105, 180, 0.25),
+				inset 0 2px 4px rgba(0,0,0,0.15);
+		}
+
+		/* disabled */
+		#shiftBtn:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none;
+			box-shadow: none;
+		}
+
+		#shiftBtn.is-success {
+			animation: shiftSuccess 0.6s ease;
+		}
+
+		@keyframes shiftSuccess {
+			0%   { box-shadow: 0 0 0 rgba(255,105,180,0); }
+			50%  { box-shadow: 0 0 18px rgba(255,105,180,0.6); }
+			100% { box-shadow: 0 0 0 rgba(255,105,180,0); }
+		}
+
 		/* =========================================
 			セクション
 		========================================= */
